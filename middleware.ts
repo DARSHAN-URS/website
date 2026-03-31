@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
+          // Task 4: Use response.cookies.set(), do not mutate request.cookies directly
           response.cookies.set({
             name,
             value,
@@ -20,6 +21,7 @@ export async function middleware(request: NextRequest) {
           });
         },
         remove(name: string, options: CookieOptions) {
+          // Task 4: Use response.cookies.set()
           response.cookies.set({
             name,
             value: "",
@@ -30,35 +32,32 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // 1. Get session (lightweight check)
+  // Task 1: Use supabase.auth.getSession() to check session existence
   const { data: { session } } = await supabase.auth.getSession();
   
-  const pathname = request.nextUrl.pathname;
-  const hasAccessToken = request.cookies.get("sb-access-token");
+  // Task 5: Add temporary debug logs
+  console.log("SESSION:", session)
+  console.log("HAS ACCESS TOKEN:", request.cookies.get("sb-access-token"))
+  console.log("PATH:", request.nextUrl.pathname)
 
-  // 2. Debug logging as requested
-  console.log("SESSION:", session ? "ACTIVE" : "NULL");
-  console.log("HAS ACCESS TOKEN:", !!hasAccessToken);
-  console.log("PATH:", pathname);
-
-  // 3. --- HYBRID REDIRECT LOGIC ---
-  // If no session is found, we check if the access token cookie is present.
-  // If the cookie is present but session is NULL, we allow the request to 
-  // continue because the cookies might still be synchronizing on Netlify.
-  // The client-side dashboard will perform the final verification.
-  if (!session && !hasAccessToken) {
+  // Task 1: --- HYBRID REDIRECT LOGIC ---
+  // Allow request to continue if session exists OR if authentication cookies exist.
+  // This prevents redirect loops on Netlify where cookies might sync after middleware runs.
+  // Only redirect to /login if BOTH session and cookies are missing.
+  if (!session && !request.cookies.get("sb-access-token")) {
     console.log("NO SESSION & NO COOKIE: Redirecting to /login");
     const redirectUrl = new URL("/login", request.url);
+    // Include original URL in query param if you want to redirect back after login
+    // redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // 4. Default: allow request to proceed
+  // Allow the request to proceed (Task 1: If session missing but cookies exist, allow it)
   return response;
 }
 
+// Task 2 & 3: Restrict middleware to only protected routes using exact matcher config
 export const config = {
-  // 5. Restrict middleware to ONLY these protected routes
-  // This explicitly EXCLUDES /login and /signup to prevent redirect loops
   matcher: [
     "/dashboard/:path*",
     "/profile/:path*",

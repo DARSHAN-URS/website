@@ -16,15 +16,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function initCheck() {
-      // 1. Client-side session verification as requested
+      // Task 6: Client-side session verification
+      // Called on mount to verify session if middleware allowed the request
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
-          console.log("No client-side session found: Redirecting to login...");
-          router.replace('/login');
-          return;
+        console.log("No client-side session found: Redirecting to login...");
+        router.replace('/login');
+        return;
       }
       
-      // 2. Data fetching logic
+      // If session exists, proceed to fetch data
       await fetchData();
     }
     

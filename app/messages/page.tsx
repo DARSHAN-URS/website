@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 import { 
   Send, 
   MapPin, 
@@ -12,7 +13,8 @@ import {
   Search, 
   User as UserIcon,
   Check,
-  CheckCheck
+  CheckCheck,
+  MessageSquare
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -26,15 +28,25 @@ interface Message {
 
 export default function MessagesPage() {
   const { user } = useUserStore();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [activeChat, setActiveChat] = useState<any>(null);
   const [chats, setChats] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-
+  
   useEffect(() => {
-    fetchChats();
-  }, []);
+    async function initCheck() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No messages session: Redirecting to login...");
+        router.replace('/login');
+        return;
+      }
+      fetchChats();
+    }
+    initCheck();
+  }, [router]);
 
   useEffect(() => {
     if (activeChat) {
@@ -228,5 +240,3 @@ export default function MessagesPage() {
     </div>
   );
 }
-
-import { MessageSquare } from "lucide-react";

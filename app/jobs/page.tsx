@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 import { 
   Plus, 
   Search, 
@@ -40,9 +41,20 @@ export default function JobsPage() {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("Painting");
 
+  const router = useRouter();
+
   useEffect(() => {
-    fetchJobs();
-  }, [role]);
+    async function initCheck() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No jobs session: Redirecting to login...");
+        router.replace('/login');
+        return;
+      }
+      fetchJobs();
+    }
+    initCheck();
+  }, [role, router]);
 
   async function fetchJobs() {
     setLoading(true);

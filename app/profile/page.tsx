@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 import { 
   User as UserIcon, 
   MapPin, 
@@ -31,9 +32,20 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [skills, setSkills] = useState("");
 
+  const router = useRouter();
+
   useEffect(() => {
-    fetchProfile();
-  }, [user]);
+    async function initCheck() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No profile session: Redirecting to login...");
+        router.replace('/login');
+        return;
+      }
+      fetchProfile();
+    }
+    initCheck();
+  }, [user, router]);
 
   async function fetchProfile() {
     setLoading(true);

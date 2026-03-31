@@ -15,9 +15,25 @@ import {
   Languages
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import React, { useEffect } from "react";
 
 export default function SettingsPage() {
   const { role } = useUserStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    async function initCheck() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No settings session: Redirecting to login...");
+        router.replace('/login');
+        return;
+      }
+    }
+    initCheck();
+  }, [router]);
 
   const settingsItems = [
     { 
