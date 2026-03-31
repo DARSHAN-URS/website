@@ -12,40 +12,31 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function handleLogin(event: React.FormEvent) {
+    event.preventDefault();
     setLoading(true);
     setError(null);
     
     try {
-        // Authenticate with Supabase
-        const { error: loginError, data } = await supabase.auth.signInWithPassword({ 
-            email, 
-            password 
-        });
+      const { error: loginError } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
 
-        if (loginError) {
-            setError(loginError.message);
-            setLoading(false);
-            return;
-        }
-
-        // If login successful, trigger a page refresh to sync cookies for middleware
-        // This is crucial for Next.js 15+ to ensure the middleware sees the session
+      if (loginError) {
+        setError(loginError.message);
+      } else {
+        // Essential for Next.js 15+ App Router navigation to /dashboard
+        router.push('/dashboard');
         router.refresh();
-        
-        // Wait a small moment for cookies to sync before redirecting
-        setTimeout(() => {
-            router.push('/dashboard');
-            setLoading(false);
-        }, 500);
-        
+      }
     } catch (err) {
-        console.error("Unexpected login error:", err);
-        setError("An unexpected error occurred. Please try again.");
-        setLoading(false);
+      console.error("Unexpected login error:", err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#eef5fb] p-6">
@@ -65,25 +56,32 @@ export default function Login() {
             <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg text-sm shadow-sm flex flex-col gap-1">
                 <span className="font-bold">Login Failed</span>
                 <span>{error}</span>
-                {error.includes("confirmed") && (
-                    <span className="mt-2 text-xs font-semibold underline cursor-pointer">Resend confirmation email?</span>
-                )}
             </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Email Address</label>
+            <label htmlFor="email" className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Email Address</label>
             <input 
-              type="email" required value={email} onChange={e => setEmail(e.target.value)}
+              id="email"
+              name="email"
+              type="email" 
+              required 
+              autoComplete="email"
+              value={email} onChange={e => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] focus:ring-2 focus:ring-[#3d7ab5]/10 transition-all font-medium"
               placeholder="name@example.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Password</label>
+            <label htmlFor="password" className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Password</label>
             <input 
-              type="password" required value={password} onChange={e => setPassword(e.target.value)}
+              id="password"
+              name="password"
+              type="password" 
+              required 
+              autoComplete="current-password"
+              value={password} onChange={e => setPassword(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] focus:ring-2 focus:ring-[#3d7ab5]/10 transition-all font-medium"
               placeholder="••••••••"
             />
