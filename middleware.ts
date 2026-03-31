@@ -1,12 +1,8 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  let response = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,49 +10,66 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          return request.cookies.get(name)?.value
+          return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
           response.cookies.set({
             name,
             value,
             ...options,
-          })
+          });
         },
         remove(name: string, options: CookieOptions) {
           response.cookies.set({
             name,
-            value: '',
+            value: "",
             ...options,
-          })
+          });
         },
       },
     }
-  )
+  );
 
-  // Use getSession for faster check in middleware
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  // Debug logging as requested
-  console.log("SESSION STATUS:", session ? "ACTIVE" : "NONE", "PATH:", request.nextUrl.pathname);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  // If no session and trying to access a protected route
-  if (!session) {
-    const url = new URL('/login', request.url)
-    return NextResponse.redirect(url)
+  const pathname = request.nextUrl.pathname;
+
+  const protectedPaths = [
+    "/dashboard",
+    "/profile",
+    "/jobs",
+    "/messages",
+    "/settings",
+  ];
+
+  const isProtected = protectedPaths.some((path) =>
+    pathname.startsWith(path)
+  );
+
+  // --- KEY FIX ---
+  // Allow request to continue once to let cookies sync
+  if (!session && isProtected) {
+    const redirectUrl = new URL("/login", request.url);
+
+    // Prevent infinite redirect loop
+    if (!request.cookies.get("sb-access-token")) {
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return response;
   }
 
-  // If session exists, proceed to the protected page
-  return response
+  return response;
 }
 
 export const config = {
-  // Only run middleware on these protected paths to avoid redirect loops and unnecessary checks
   matcher: [
-    '/dashboard/:path*',
-    '/profile/:path*',
-    '/jobs/:path*',
-    '/messages/:path*',
-    '/settings/:path*',
+    "/dashboard/:path*",
+    "/profile/:path*",
+    "/jobs/:path*",
+    "/messages/:path*",
+    "/settings/:path*",
   ],
-}
+};
