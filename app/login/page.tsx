@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Login() {
@@ -10,7 +9,6 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
@@ -25,18 +23,13 @@ export default function Login() {
 
       if (loginError) {
         setError(loginError.message);
-        setLoading(false);
-        return;
+      } else {
+        console.log("Login success, redirecting...");
+        
+        // Use a full page reload to ensure session cookies are recognized by middleware on first load
+        // This is a reliable way to fix redirect loops on platforms like Netlify
+        window.location.href = "/dashboard";
       }
-
-      console.log("Login success, redirecting...");
-      
-      // Navigate to dashboard
-      router.push('/dashboard');
-      
-      // Refresh to ensure context updates
-      router.refresh();
-
     } catch (err) {
       console.error("Unexpected login error:", err);
       setError("An unexpected error occurred. Please try again.");

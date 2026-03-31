@@ -34,30 +34,29 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // FIX: use getSession instead of getUser
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Use getSession for faster check in middleware
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  // Debug logging as requested
+  console.log("SESSION STATUS:", session ? "ACTIVE" : "NONE", "PATH:", request.nextUrl.pathname);
 
-  const protectedPaths = [
-    '/dashboard',
-    '/profile',
-    '/jobs',
-    '/messages',
-    '/settings',
-  ]
-
-  const isProtectedPath = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  )
-
-  if (isProtectedPath && !session) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // If no session and trying to access a protected route
+  if (!session) {
+    const url = new URL('/login', request.url)
+    return NextResponse.redirect(url)
   }
 
+  // If session exists, proceed to the protected page
   return response
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  // Only run middleware on these protected paths to avoid redirect loops and unnecessary checks
+  matcher: [
+    '/dashboard/:path*',
+    '/profile/:path*',
+    '/jobs/:path*',
+    '/messages/:path*',
+    '/settings/:path*',
+  ],
 }
