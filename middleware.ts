@@ -17,16 +17,6 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
           response.cookies.set({
             name,
             value,
@@ -34,16 +24,6 @@ export async function middleware(request: NextRequest) {
           })
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
           response.cookies.set({
             name,
             value: '',
@@ -54,7 +34,10 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // FIX: use getSession instead of getUser
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
   const protectedPaths = [
     '/dashboard',
@@ -62,15 +45,14 @@ export async function middleware(request: NextRequest) {
     '/jobs',
     '/messages',
     '/settings',
-  ];
+  ]
 
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
-  );
+  )
 
-  if (isProtectedPath && !user) {
-    const url = new URL('/login', request.url)
-    return NextResponse.redirect(url)
+  if (isProtectedPath && !session) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   return response
