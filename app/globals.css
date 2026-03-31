@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --blue: #3d7ab5;
+  --blue-dark: #2c5f8a;
+  --blue-light: #c8dff0;
+  --blue-pale: #eef5fb;
+  --green: #1a8c4e;
+  --green-pale: #e6f7ee;
+  --green-light: #b7e4cd;
+  --text: #1a2533;
+  --muted: #6b7f93;
+  --white: #fff;
+  --border: #dde9f3;
+  --orange: #e07b39;
+  --orange-bg: #fdf0e8;
+  --red: #d63b3b;
+  --radius: 16px;
+}
+
+body {
+  color: var(--text);
+  background: var(--white);
+}
