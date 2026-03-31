@@ -13,8 +13,8 @@ export default function Signup() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function handleSignup(event: React.FormEvent) {
+    event.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -30,28 +30,19 @@ export default function Signup() {
 
         if (signupError) {
           setError(signupError.message);
-          setLoading(false);
-          return;
-        }
-
-        // Check if user is automatically logged in or needs verification
-        if (data.session) {
+        } else if (data.session) {
+            router.push('/dashboard');
             router.refresh();
-            setTimeout(() => {
-                router.push('/dashboard');
-                setLoading(false);
-            }, 500);
         } else {
-            // Usually means confirmation email sent
             setSuccess(true);
-            setLoading(false);
         }
     } catch (err) {
         console.error("Unexpected signup error:", err);
         setError("An unexpected error occurred. Please try again.");
+    } finally {
         setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#eef5fb] p-6">
@@ -84,17 +75,27 @@ export default function Signup() {
         ) : (
             <form onSubmit={handleSignup} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Email Address</label>
+                <label htmlFor="email" className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Email Address</label>
                 <input 
-                  type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  id="email"
+                  name="email"
+                  type="email" 
+                  required 
+                  autoComplete="email"
+                  value={email} onChange={e => setEmail(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] focus:ring-2 focus:ring-[#3d7ab5]/10 transition-all font-medium"
                   placeholder="name@example.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Password</label>
+                <label htmlFor="password" className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Password</label>
                 <input 
-                  type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                  id="password"
+                  name="password"
+                  type="password" 
+                  required 
+                  autoComplete="new-password"
+                  value={password} onChange={e => setPassword(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] focus:ring-2 focus:ring-[#3d7ab5]/10 transition-all font-medium"
                   placeholder="••••••••"
                 />
