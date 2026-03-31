@@ -16,13 +16,35 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
-    } else {
-      router.push('/dashboard');
+    
+    try {
+        // Authenticate with Supabase
+        const { error: loginError, data } = await supabase.auth.signInWithPassword({ 
+            email, 
+            password 
+        });
+
+        if (loginError) {
+            setError(loginError.message);
+            setLoading(false);
+            return;
+        }
+
+        // If login successful, trigger a page refresh to sync cookies for middleware
+        // This is crucial for Next.js 15+ to ensure the middleware sees the session
+        router.refresh();
+        
+        // Wait a small moment for cookies to sync before redirecting
+        setTimeout(() => {
+            router.push('/dashboard');
+            setLoading(false);
+        }, 500);
+        
+    } catch (err) {
+        console.error("Unexpected login error:", err);
+        setError("An unexpected error occurred. Please try again.");
+        setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -39,35 +61,48 @@ export default function Login() {
            <p className="text-[#6b7f93]">Sign in to access your account</p>
         </div>
 
-        {error && <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg text-sm">{error}</div>}
+        {error && (
+            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg text-sm shadow-sm flex flex-col gap-1">
+                <span className="font-bold">Login Failed</span>
+                <span>{error}</span>
+                {error.includes("confirmed") && (
+                    <span className="mt-2 text-xs font-semibold underline cursor-pointer">Resend confirmation email?</span>
+                )}
+            </div>
+        )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold mb-1.5 ml-1">Email Address</label>
+            <label className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Email Address</label>
             <input 
               type="email" required value={email} onChange={e => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5]"
+              className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] focus:ring-2 focus:ring-[#3d7ab5]/10 transition-all font-medium"
               placeholder="name@example.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1.5 ml-1">Password</label>
+            <label className="block text-sm font-semibold mb-1.5 ml-1 text-[#1a2533]">Password</label>
             <input 
               type="password" required value={password} onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5]"
+              className="w-full px-4 py-3 rounded-xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] focus:ring-2 focus:ring-[#3d7ab5]/10 transition-all font-medium"
               placeholder="••••••••"
             />
           </div>
           <button 
             type="submit" disabled={loading}
-            className="w-full bg-[#3d7ab5] text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-[#2c5f8a] transition-all disabled:opacity-50"
+            className="w-full bg-[#3d7ab5] text-white py-4 rounded-xl font-bold shadow-lg hover:bg-[#2c5f8a] hover:-translate-y-0.5 active:scale-[0.98] transition-all disabled:opacity-50 disabled:translate-y-0 disabled:scale-100 flex items-center justify-center gap-2"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? (
+                <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Signing in...</span>
+                </>
+            ) : 'Sign In'}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-[#6b7f93]">
-          Don't have an account? <Link href="/signup" className="text-[#3d7ab5] font-bold hover:underline">Sign up</Link>
+        <p className="text-center mt-8 text-sm text-[#6b7f93] font-medium">
+          Don't have an account? <Link href="/signup" className="text-[#3d7ab5] font-extrabold hover:underline">Sign up</Link>
         </p>
       </div>
     </div>
