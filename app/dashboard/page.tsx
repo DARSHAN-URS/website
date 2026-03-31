@@ -4,15 +4,30 @@ import { useUserStore } from "@/lib/store";
 import Sidebar from "@/components/Sidebar";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 import { MapPin, Search, Filter, Briefcase, User as UserIcon } from "lucide-react";
 
 export default function Dashboard() {
   const { role } = useUserStore();
+  const router = useRouter();
   const [workers, setWorkers] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    async function initCheck() {
+      // 1. Client-side session verification as requested
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+          console.log("No client-side session found: Redirecting to login...");
+          router.replace('/login');
+          return;
+      }
+      
+      // 2. Data fetching logic
+      await fetchData();
+    }
+    
     async function fetchData() {
       // Prevent fetching if client isn't fully initialized with ENV variables
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -34,8 +49,9 @@ export default function Dashboard() {
       }
       setLoading(false);
     }
-    fetchData();
-  }, [role]);
+    
+    initCheck();
+  }, [role, router]);
 
   return (
     <div className="flex bg-[#fdfdfd] min-h-screen">
