@@ -25,11 +25,18 @@ export default function Login() {
 
       if (loginError) {
         setError(loginError.message);
-      } else {
-        // Essential for Next.js 15+ App Router navigation to /dashboard
-        router.push('/dashboard');
-        router.refresh();
+        setLoading(false);
+        return;
       }
+
+      console.log("Login success, redirecting...");
+      
+      // Navigate to dashboard
+      router.push('/dashboard');
+      
+      // Refresh to ensure context updates
+      router.refresh();
+
     } catch (err) {
       console.error("Unexpected login error:", err);
       setError("An unexpected error occurred. Please try again.");
