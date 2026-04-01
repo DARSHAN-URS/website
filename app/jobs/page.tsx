@@ -13,23 +13,26 @@ import {
   Trash2, 
   Edit3, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  Navigation
 } from "lucide-react";
 
 interface Job {
   id: string;
   title: string;
   description: string;
-  category: string;
-  price: number;
-  location: string;
+  category_id: number;
+  salary_min: number;
+  job_city: string;
   created_at: string;
-  user_id: string;
+  employer_id: string;
   status: "open" | "closed";
+  price?: number;
+  location?: string;
 }
 
 export default function JobsPage() {
-  const { role, user } = useUserStore();
+  const { role, user, setUser } = useUserStore();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -43,6 +46,26 @@ export default function JobsPage() {
 
   const router = useRouter();
 
+  async function fetchJobs(customUserId?: string) {
+    setLoading(true);
+    let query = supabase.from("jobs").select("*").order("created_at", { ascending: false });
+    
+    // Use the latest state to avoid closure issues
+    const { role: currentRole, user: currentUser } = useUserStore.getState();
+    const activeUserId = customUserId || currentUser?.id;
+
+    if (currentRole === 'employer' && activeUserId) {
+       query = query.eq('employer_id', activeUserId);
+    } else {
+       query = query.eq('status', 'open');
+    }
+    
+    const { data, error } = await query;
+    if (data) setJobs(data);
+    if (error) console.error("Jobs fetch error:", error.message);
+    setLoading(false);
+  }
+
   useEffect(() => {
     async function initCheck() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -51,27 +74,36 @@ export default function JobsPage() {
         router.replace('/login');
         return;
       }
-      fetchJobs();
+      
+      setUser(session.user);
+      fetchJobs(session.user.id);
     }
+    
     initCheck();
-  }, [role, router]);
+  }, [role, router, setUser]);
 
-  async function fetchJobs() {
-    setLoading(true);
-    let query = supabase.from("jobs").select("*").order("created_at", { ascending: false });
-    
-    // If employer, show their own jobs; if worker, show all open jobs
-    /* 
-    if (role === 'employer' && user?.id) {
-       query = query.eq('user_id', user.id);
-    } else {
-       query = query.eq('status', 'open');
-    }
-    */
-    
-    const { data, error } = await query;
-    if (data) setJobs(data);
-    setLoading(false);
+  const [detecting, setDetecting] = useState(false);
+
+  async function handleDetectLocation() {
+    if (!navigator.geolocation) return alert("Geolocation is not supported by your browser.");
+    setDetecting(true);
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      try {
+        const { latitude, longitude } = position.coords;
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const data = await res.json();
+        const city = data.address.city || data.address.town || data.address.suburb || data.address.state || "Unknown Location";
+        setLocation(city);
+      } catch (err) {
+        console.error("Location detection failed", err);
+      } finally {
+        setDetecting(false);
+      }
+    }, (err) => {
+      console.error(err);
+      setDetecting(false);
+      alert("Please enable location permissions in your browser.");
+    });
   }
 
   async function handlePostJob(e: React.FormEvent) {
@@ -82,19 +114,20 @@ export default function JobsPage() {
     const newJob = {
       title,
       description,
-      price: parseFloat(price),
-      location,
-      category,
-      user_id: session.user.id,
+      salary_min: parseFloat(price),
+      salary_max: parseFloat(price),
+      job_city: location,
+      category_id: 1, // Default category
+      employer_id: session.user.id,
       status: "open",
     };
 
     const { error } = await supabase.from("jobs").insert([newJob]);
     if (error) {
-      alert(error.message);
+      alert("Error posting job: " + error.message);
     } else {
       setShowModal(false);
-      fetchJobs();
+      await fetchJobs();
       // Reset form
       setTitle(""); setDescription(""); setPrice(""); setLocation("");
     }
@@ -104,13 +137,11 @@ export default function JobsPage() {
     if (!confirm("Are you sure you want to delete this job?")) return;
     const { error } = await supabase.from("jobs").delete().eq("id", id);
     if (error) alert(error.message);
-    else fetchJobs();
+    else await fetchJobs();
   }
 
   return (
-    <div className="flex bg-[#fdfdfd] min-h-screen">
-      <Sidebar />
-      <main className="flex-1 ml-64 p-10 mt-6 lg:mt-0">
+    <div className="p-10">
         <header className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-3xl font-extrabold text-[#1a2533] font-serif">
@@ -149,13 +180,13 @@ export default function JobsPage() {
                 <div key={job.id} className="bg-white border border-[#dde9f3] rounded-[24px] p-6 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 border-l-4 border-l-[#3d7ab5]">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#eef5fb] text-[#3d7ab5] border border-[#c8dff0] uppercase tracking-wider">{job.category}</span>
-                       <span className="text-[10px] font-bold text-[#6b7f93] uppercase tracking-widest bg-gray-50 px-2.5 py-0.5 rounded-full">ID: {job.id.slice(0, 8)}</span>
+                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#eef5fb] text-[#3d7ab5] border border-[#c8dff0] uppercase tracking-wider">{job.category_id === 1 ? "Painting" : "General"}</span>
+                       <span className="text-[10px] font-bold text-[#6b7f93] uppercase tracking-widest bg-gray-50 px-2.5 py-0.5 rounded-full">ID: {String(job.id).slice(0, 8)}</span>
                     </div>
                     <h3 className="text-xl font-bold text-[#1a2533] mb-2">{job.title}</h3>
                     <p className="text-sm text-[#6b7f93] font-medium line-clamp-2 max-w-2xl mb-4 leading-relaxed">{job.description}</p>
                     <div className="flex items-center gap-6 text-xs font-bold text-[#6b7f93]">
-                       <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#3d7ab5]" /> {job.location || 'Anywhere'}</div>
+                       <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#3d7ab5]" /> {job.job_city || 'Anywhere'}</div>
                        <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#3d7ab5]" /> Just Now</div>
                        <div className="flex items-center gap-1.5 text-[#1a8c4e]"><CheckCircle2 className="w-3.5 h-3.5" /> Verified Listing</div>
                     </div>
@@ -207,9 +238,32 @@ export default function JobsPage() {
                     <label className="block text-sm font-bold text-[#1a2533] mb-2 ml-1">Budget (₹)</label>
                     <input type="number" required value={price} onChange={e => setPrice(e.target.value)} className="w-full px-5 py-3.5 rounded-2xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] font-medium text-sm" placeholder="e.g. 1500"/>
                   </div>
-                  <div className="md:col-span-2">
+                  <div className="md:col-span-2 relative group">
                     <label className="block text-sm font-bold text-[#1a2533] mb-2 ml-1">Location</label>
-                    <input type="text" required value={location} onChange={e => setLocation(e.target.value)} className="w-full px-5 py-3.5 rounded-2xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] font-medium text-sm" placeholder="e.g. Sector 62, Noida"/>
+                    <div className="relative">
+                       <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#3d7ab5] z-10" />
+                       <input 
+                         type="text" 
+                         required 
+                         value={location} 
+                         onChange={e => setLocation(e.target.value)} 
+                         className="w-full pl-12 pr-40 py-3.5 rounded-2xl border border-[#dde9f3] outline-none focus:border-[#3d7ab5] font-medium text-sm" 
+                         placeholder="e.g. Sector 62, Noida"
+                       />
+                       <button 
+                         type="button"
+                         onClick={handleDetectLocation}
+                         disabled={detecting}
+                         className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#eef5fb] text-[#3d7ab5] text-[10px] font-extrabold uppercase px-4 py-2 rounded-xl border border-[#c8dff0] hover:bg-[#3d7ab5] hover:text-white transition-all flex items-center gap-1.5"
+                       >
+                          {detecting ? (
+                            <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full" />
+                          ) : (
+                            <Navigation className="w-3 h-3" />
+                          )}
+                          {detecting ? "Locating..." : "Use My Location"}
+                       </button>
+                    </div>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-bold text-[#1a2533] mb-2 ml-1">Description</label>
@@ -224,7 +278,6 @@ export default function JobsPage() {
             </div>
           </div>
         )}
-      </main>
     </div>
   );
 }

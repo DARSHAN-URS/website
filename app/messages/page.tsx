@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { 
   Send, 
   MapPin, 
@@ -27,12 +27,14 @@ interface Message {
 }
 
 export default function MessagesPage() {
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [activeChat, setActiveChat] = useState<any>(null);
   const [chats, setChats] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -43,13 +45,16 @@ export default function MessagesPage() {
         router.replace('/login');
         return;
       }
-      fetchChats();
+      setUser(session.user);
+      
+      const partnerId = searchParams.get('user_id');
+      await fetchChats(session.user.id, partnerId);
     }
     initCheck();
-  }, [router]);
+  }, [router, searchParams, setUser]);
 
   useEffect(() => {
-    if (activeChat) {
+    if (activeChat && user) {
       fetchMessages(activeChat.id);
       
       // Subscribe to real-time updates for messages
@@ -58,10 +63,13 @@ export default function MessagesPage() {
         .on('postgres_changes', { 
             event: 'INSERT', 
             schema: 'public', 
-            table: 'messages',
-            filter: `receiver_id=eq.${user?.id}`
+            table: 'chat_messages'
           }, (payload) => {
-            setMessages(prev => [...prev, payload.new as Message]);
+            const newMsg = payload.new as Message;
+            if ((newMsg.sender_id === user.id && newMsg.receiver_id === activeChat.id) ||
+                (newMsg.sender_id === activeChat.id && newMsg.receiver_id === user.id)) {
+              setMessages(prev => [...prev, newMsg]);
+            }
           }
         )
         .subscribe();
@@ -76,60 +84,128 @@ export default function MessagesPage() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  async function fetchChats() {
-    // Mocking chat list - in production, fetch from a 'conversations' or unique 'messages' view
-    setChats([
-      { id: '1', name: 'Ajay Pawar', role: 'Painter', avatar: '👨‍🎨', lastMsg: 'I can start tomorrow', time: '10:30 AM', status: 'online' },
-      { id: '2', name: 'Priya Sharma', role: 'Cleaner', avatar: '👩‍🍳', lastMsg: 'Send location please', time: 'Yesterday', status: 'offline' },
-    ]);
+  async function fetchChats(userId: string, newPartnerId?: string | null) {
+    setLoading(true);
+    try {
+      const { data: msgs, error } = await supabase
+        .from('chat_messages')
+        .select('sender_id, receiver_id')
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+
+      if (error) throw error;
+
+      const partnerIds = new Set<string>();
+      if (newPartnerId && newPartnerId !== userId) partnerIds.add(newPartnerId);
+      
+      msgs?.forEach(m => {
+        if (m.sender_id !== userId) partnerIds.add(m.sender_id);
+        if (m.receiver_id !== userId) partnerIds.add(m.receiver_id);
+      });
+
+      if (partnerIds.size === 0) {
+        setChats([]);
+        setLoading(false);
+        return;
+      }
+
+      const partnerIdArr = Array.from(partnerIds);
+      
+      // Fetch details from employees and employers instead of 'profiles'
+      const { data: employees } = await supabase
+        .from('employees')
+        .select('id, full_name, avatar_url')
+        .in('id', partnerIdArr);
+
+      const { data: employers } = await supabase
+        .from('employers')
+        .select('id, company_name, avatar_url')
+        .in('id', partnerIdArr);
+
+      const allUsers = [
+        ...(employees || []).map(e => ({ id: e.id, name: e.full_name, avatar: e.avatar_url, role: "Worker" })),
+        ...(employers || []).map(e => ({ id: e.id, name: e.company_name, avatar: e.avatar_url, role: "Employer" }))
+      ];
+
+      const formattedChats = allUsers.map(p => ({
+        id: p.id,
+        name: p.name || "Service Professional",
+        avatar: p.avatar || "👨🏾",
+        role: p.role, 
+        lastMsg: "Click to chat", 
+        status: "online"
+      }));
+
+      console.log("Formatted Chats:", formattedChats);
+      setChats(formattedChats);
+      
+      if (newPartnerId) {
+        let target = formattedChats.find(c => c.id === newPartnerId);
+        
+        // If not found in the list, try fetching it specifically (robust fallback)
+        if (!target) {
+          console.log("Target not in initial list, fetching specifically for:", newPartnerId);
+          const { data: eData } = await supabase.from('employees').select('full_name, avatar_url').eq('id', newPartnerId).maybeSingle();
+          if (eData) {
+            target = { id: newPartnerId, name: eData.full_name, avatar: eData.avatar_url || "👨🏾‍🔧", role: "Worker", lastMsg: "Starting conversation...", status: "online" };
+          } else {
+            const { data: emData } = await supabase.from('employers').select('company_name, avatar_url').eq('id', newPartnerId).maybeSingle();
+            if (emData) {
+              target = { id: newPartnerId, name: emData.company_name, avatar: emData.avatar_url || "🏢", role: "Employer", lastMsg: "Starting conversation...", status: "online" };
+            }
+          }
+          
+          if (target) {
+            console.log("Found targeted profile:", target);
+            setChats(prev => [target, ...prev]);
+          }
+        }
+
+        if (target) {
+          setActiveChat(target);
+        } else if (partnerIds.has(newPartnerId)) {
+           const placeholder = { id: newPartnerId, name: "Staff User", avatar: "👤", role: "Contact", lastMsg: "Starting conversation...", status: "online" };
+           setActiveChat(placeholder);
+        }
+      }
+    } catch (err) {
+      console.error("Chat fetch error:", err);
+    }
+    setLoading(false);
   }
 
-  async function fetchMessages(chatId: string) {
-    // Query messages between current user and chat partner
-    /*
-    const { data } = await supabase
-      .from('messages')
+  async function fetchMessages(partnerId: string) {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('chat_messages')
       .select('*')
-      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
       .order('created_at', { ascending: true });
+    
     if (data) setMessages(data);
-    */
-    // For demo/UI consistency, mock messages
-    setMessages([
-      { id: '1', content: 'Hello, are you available for a painting job?', sender_id: 'user', receiver_id: '1', created_at: new Date().toISOString() },
-      { id: '2', content: 'Yes! Where is the location?', sender_id: '1', receiver_id: 'user', created_at: new Date().toISOString() },
-    ]);
+    if (error) console.error("Msg fetch error:", error);
   }
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
-    if (!newMessage.trim() || !activeChat) return;
+    if (!newMessage.trim() || !activeChat || !user) return;
 
-    /*
-    const { error } = await supabase.from('messages').insert([{
-      content: newMessage,
+    const msgData = {
       sender_id: user.id,
-      receiver_id: activeChat.id
-    }]);
-    */
-    
-    // UI Mock Update
-    const msg = { 
-      id: Date.now().toString(), 
-      content: newMessage, 
-      sender_id: 'user', 
-      receiver_id: activeChat.id, 
-      created_at: new Date().toISOString() 
+      receiver_id: activeChat.id,
+      content: newMessage,
     };
-    setMessages([...messages, msg]);
-    setNewMessage("");
+
+    const { error } = await supabase.from('chat_messages').insert([msgData]);
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      setNewMessage("");
+    }
   }
 
   return (
-    <div className="flex bg-[#fdfdfd] min-h-screen">
-      <Sidebar />
-      <main className="flex-1 ml-64 p-0 flex h-screen overflow-hidden">
-        {/* Left Sidebar: Conversations */}
+    <div className="flex h-[calc(100vh-84px)] overflow-hidden">
+      {/* Left Sidebar: Conversations */}
         <div className="w-[380px] bg-white border-r border-[#dde9f3] flex flex-col h-full">
            <div className="p-6 border-b border-[#dde9f3]">
               <h1 className="text-2xl font-extrabold text-[#1a2533] font-serif mb-5">Messages</h1>
@@ -193,7 +269,7 @@ export default function MessagesPage() {
                {/* Chat Messages */}
                <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-gradient-to-b from-white to-[#f8fafd]">
                   {messages.map((msg, i) => {
-                    const isUser = msg.sender_id === 'user';
+                    const isUser = msg.sender_id === user?.id;
                     return (
                       <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                          <div className={`max-w-[70%] ${isUser ? 'order-1' : 'order-2'}`}>
@@ -236,7 +312,6 @@ export default function MessagesPage() {
              </div>
            )}
         </div>
-      </main>
     </div>
   );
 }

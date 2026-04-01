@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
   Briefcase, 
-  MessageSquare, 
   User, 
   Settings,
   LogOut,
-  Map as MapIcon,
-  PlusCircle
+  Calendar,
+  CheckCircle,
+  Search
 } from "lucide-react";
 import { useUserStore } from "@/lib/store";
 import { supabase } from "@/lib/supabaseClient";
@@ -21,13 +21,22 @@ export default function Sidebar() {
   const { role, setRole, logout } = useUserStore();
   const router = useRouter();
 
-  const navItems = [
+  const hireNavItems = [
     { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-    { name: "Jobs", icon: Briefcase, path: "/jobs" },
-    { name: "Messages", icon: MessageSquare, path: "/messages" },
+    { name: "Search", icon: Search, path: "/search" },
+    { name: "Posted Jobs", icon: Briefcase, path: "/jobs" },
+    { name: "Bookings", icon: Calendar, path: "/bookings" },
     { name: "Profile", icon: User, path: "/profile" },
-    { name: "Settings", icon: Settings, path: "/settings" },
   ];
+
+  const workNavItems = [
+    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { name: "Search", icon: Search, path: "/jobs" },
+    { name: "Applied", icon: CheckCircle, path: "/applied" },
+    { name: "Profile", icon: User, path: "/profile" },
+  ];
+
+  const navItems = role === 'employer' ? hireNavItems : workNavItems;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -36,7 +45,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-[#dde9f3] flex flex-col fixed left-0 top-0">
+    <div className="w-64 h-screen bg-white border-r border-[#dde9f3] flex flex-col fixed left-0 top-0 z-[100]">
       <div className="p-6">
         <Link href="/" className="flex items-center gap-2 mb-8">
           <svg className="w-8 h-8" viewBox="0 0 80 80" fill="none">
