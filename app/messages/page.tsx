@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Sidebar from "@/components/Sidebar";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
@@ -26,7 +26,7 @@ interface Message {
   created_at: string;
 }
 
-export default function MessagesPage() {
+function MessagesContent() {
   const { user, setUser } = useUserStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -313,5 +313,17 @@ export default function MessagesPage() {
            )}
         </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+       <div className="flex-1 flex items-center justify-center h-full">
+         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3d7ab5]"></div>
+       </div>
+    }>
+      <MessagesContent />
+    </Suspense>
   );
 }
