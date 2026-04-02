@@ -47,11 +47,15 @@ export default function Sidebar() {
   return (
     <div className="w-64 h-screen bg-white border-r border-[#dde9f3] flex flex-col fixed left-0 top-0 z-[100]">
       <div className="p-6">
-        <Link href="/" className="flex items-center gap-2 mb-8">
-          <svg className="w-8 h-8" viewBox="0 0 80 80" fill="none">
-            <path d="M16 36 Q20 18 40 16 Q60 18 64 36 Q58 50 40 52 Q22 50 16 36Z" fill="#3d7ab5"/>
-          </svg>
-          <span className="font-serif text-xl font-extrabold text-[#3d7ab5]">Laborgro</span>
+        <Link href="/" className="flex flex-col items-center gap-1 mb-8 group">
+          <div className="relative">
+            <svg className="w-12 h-8 transition-transform group-hover:scale-110" viewBox="0 0 100 60" fill="none">
+              <path d="M10 45C10 45 25 10 50 10C75 10 90 45 90 45L75 55C75 55 65 30 50 30C35 30 25 55 25 55L10 45Z" fill="white" stroke="#3d7ab5" strokeWidth="6" strokeLinejoin="round"/>
+              <path d="M45 30L50 42L55 30" stroke="#3d7ab5" strokeWidth="4" strokeLinecap="round"/>
+              <circle cx="50" cy="52" r="2" fill="#3d7ab5"/>
+            </svg>
+          </div>
+          <span className="font-serif text-2xl font-extrabold text-[#3d7ab5] tracking-tight">Laborgro</span>
         </Link>
 
         <div className="mb-6 p-1.5 bg-[#eef5fb] rounded-xl flex">

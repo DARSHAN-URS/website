@@ -1,0 +1,11 @@
+id
+email
+full_name
+phone
+created_at
+is_available
+skills
+work_details
+city
+lat
+lng

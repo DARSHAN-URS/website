@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import { MapPin, Search, Filter, Briefcase, User as UserIcon, ChevronRight, Navigation } from "lucide-react";
+import { MapPin, Search, Filter, Briefcase, User as UserIcon, ChevronRight, Navigation, Mic, Languages } from "lucide-react";
 
 export default function Dashboard() {
   const { role, setUser } = useUserStore();
@@ -80,8 +80,20 @@ export default function Dashboard() {
 
   const [currentCity, setCurrentCity] = useState("Noida");
   const [isLocatingHeader, setIsLocatingHeader] = useState(false);
-  const [language, setLanguage] = useState("EN"); // EN or HI
+  const [language, setLanguage] = useState("EN");
   const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
+
+  const languages = [
+    { code: 'EN', label: 'English' },
+    { code: 'HI', label: 'हिन्दी' },
+    { code: 'MR', label: 'मराठी' },
+    { code: 'TA', label: 'தமிழ்' },
+    { code: 'TE', label: 'తెలుగు' },
+    { code: 'BN', label: 'বাংলা' },
+    { code: 'KN', label: 'ಕನ್ನಡ' },
+    { code: 'GU', label: 'ગુજરાતી' }
+  ];
 
   const translations = {
     EN: {
@@ -108,7 +120,7 @@ export default function Dashboard() {
     }
   };
 
-  const t = translations[language as keyof typeof translations];
+  const t = translations[language as keyof typeof translations] || translations.EN;
 
   const handleUpdateLocation = (city?: string) => {
     if (city) {
@@ -174,7 +186,7 @@ export default function Dashboard() {
                    <p className="text-xs text-[#6b7f93] mb-6 font-medium">{t.locDesc}</p>
                    
                    {/* Manual Entry Text Box */}
-                   <div className="relative mb-6">
+                   <div className="relative mb-6 group/locsearch">
                       <input 
                          type="text" 
                          value={currentCity}
@@ -184,6 +196,9 @@ export default function Dashboard() {
                          className="w-full bg-[#f8fafd] border border-[#d9e8f5] rounded-xl py-3 px-10 text-sm font-bold text-[#1a2533] outline-none focus:border-[#3d7ab5] transition-all"
                       />
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3d7ab5]" />
+                      <button className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-[#3d7ab5] hover:bg-white hover:shadow-sm transition-all" title="Voice Input">
+                         <Mic className="w-3.5 h-3.5" />
+                      </button>
                    </div>
 
                    <button 
@@ -217,29 +232,47 @@ export default function Dashboard() {
               )}
            </div>
 
-           <div className="flex items-center gap-2 px-6 py-4 rounded-[22px] border-2 border-[#dde9f3] bg-white">
-              <div className="w-10 h-10 rounded-xl bg-[#eef5fb] flex items-center justify-center shadow-inner">
-                 <div className="text-sm font-black text-[#3d7ab5]">{language}</div>
-              </div>
-              <div className="text-left mr-6">
-                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block mb-0.5">Language</span>
-                 <span className="text-sm font-black text-[#1a2533]">{language === 'EN' ? 'English' : 'हिन्दी'}</span>
-              </div>
-              <div className="flex gap-1 bg-[#f8fafd] p-1 rounded-xl border border-[#eef5fb]">
-                 <button 
-                  onClick={() => setLanguage("EN")}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${language === 'EN' ? 'bg-[#3d7ab5] text-white shadow-sm' : 'text-[#6b7f93] hover:text-[#3d7ab5]'}`}
-                 >
-                   EN
-                 </button>
-                 <button 
-                  onClick={() => setLanguage("HI")}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${language === 'HI' ? 'bg-[#3d7ab5] text-white shadow-sm' : 'text-[#6b7f93] hover:text-[#3d7ab5]'}`}
-                 >
-                   हिन्
-                 </button>
-              </div>
-           </div>
+            <div className="relative">
+               <button 
+                 onClick={() => { setShowLanguagePicker(!showLanguagePicker); setShowLocationPicker(false); }}
+                 className="flex items-center gap-3 px-6 py-4 rounded-[22px] border-2 border-[#dde9f3] bg-white hover:border-[#3d7ab5]/30 transition-all"
+               >
+                  <div className="w-10 h-10 rounded-xl bg-[#eef5fb] flex items-center justify-center shadow-inner">
+                     <Languages className="w-5 h-5 text-[#3d7ab5]" />
+                  </div>
+                  <div className="text-left">
+                     <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block mb-0.5">Language</span>
+                     <span className="text-sm font-black text-[#1a2533]">{languages.find(l => l.code === language)?.label || 'English'}</span>
+                  </div>
+                  <div className="ml-4 w-6 h-6 rounded-full bg-[#f8fafd] flex items-center justify-center border border-[#eef5fb]">
+                     <ChevronRight className={`w-3 h-3 text-[#3d7ab5] transition-transform ${showLanguagePicker ? 'rotate-90' : ''}`} />
+                  </div>
+               </button>
+
+               {/* Language Picker Overlay */}
+               {showLanguagePicker && (
+                 <div className="absolute top-full right-0 mt-4 w-[280px] bg-white border border-[#dde9f3] rounded-[32px] shadow-2xl p-6 z-50 animate-in fade-in zoom-in duration-200">
+                    <h3 className="text-lg font-black text-[#1a2533] mb-1">Select Language</h3>
+                    <p className="text-xs text-[#6b7f93] mb-6 font-medium">Choose your preferred language</p>
+                    
+                    <div className="grid grid-cols-1 gap-2">
+                       {languages.map(lang => (
+                         <button 
+                            key={lang.code}
+                            onClick={() => {
+                               setLanguage(lang.code.toUpperCase());
+                               setShowLanguagePicker(false);
+                            }}
+                            className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all ${language === lang.code.toUpperCase() ? 'bg-[#eef5fb] border-[#3d7ab5] shadow-sm' : 'border-gray-50 hover:border-[#3d7ab5]/30 hover:bg-[#f8fafd]'}`}
+                         >
+                            <span className={`text-sm font-bold ${language === lang.code.toUpperCase() ? 'text-[#3d7ab5]' : 'text-[#1a2533]'}`}>{lang.label}</span>
+                            {language === lang.code.toUpperCase() && <div className="w-2 h-2 rounded-full bg-[#3d7ab5]"></div>}
+                         </button>
+                       ))}
+                    </div>
+                 </div>
+               )}
+            </div>
         </div>
       </header>
 
@@ -248,9 +281,12 @@ export default function Dashboard() {
            {t.location} · 📍 5km Radius
         </p>
         <div className="bg-white border border-[#dde9f3] rounded-2xl p-1.5 flex shadow-sm items-center">
-            <div className="flex items-center gap-2.5 px-4 py-2 border-r border-[#dde9f3]">
+            <div className="flex items-center gap-2.5 px-4 py-2 border-r border-[#dde9f3] flex-1">
                 <Search className="w-4 h-4 text-[#3d7ab5]" />
-                <input type="text" placeholder={t.search} className="bg-transparent border-none outline-none text-sm font-medium w-32 lg:w-48"/>
+                <input type="text" placeholder={t.search} className="bg-transparent border-none outline-none text-sm font-medium flex-1"/>
+                <button className="w-8 h-8 rounded-full flex items-center justify-center text-[#3d7ab5] hover:bg-[#eef5fb] transition-all" title="Voice Search">
+                   <Mic className="w-4 h-4" />
+                </button>
             </div>
             <button className="px-4 py-2 flex items-center gap-2 hover:bg-gray-50 rounded-xl transition-all">
                 <Filter className="w-4 h-4 text-[#6b7f93]" />

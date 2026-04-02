@@ -14,7 +14,8 @@ import {
   User as UserIcon,
   Check,
   CheckCheck,
-  MessageSquare
+  MessageSquare,
+  Mic
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -209,9 +210,12 @@ function MessagesContent() {
         <div className="w-[380px] bg-white border-r border-[#dde9f3] flex flex-col h-full">
            <div className="p-6 border-b border-[#dde9f3]">
               <h1 className="text-2xl font-extrabold text-[#1a2533] font-serif mb-5">Messages</h1>
-              <div className="relative">
+              <div className="relative group/search">
                  <Search className="w-4 h-4 text-[#6b7f93] absolute left-4 top-1/2 -translate-y-1/2" />
-                 <input type="text" placeholder="Search conversations..." className="w-full pl-11 pr-4 py-3 bg-[#eef5fb] rounded-xl border-none text-sm font-medium outline-none focus:bg-white focus:ring-2 focus:ring-[#3d7ab5]/10"/>
+                 <input type="text" placeholder="Search conversations..." className="w-full pl-11 pr-12 py-3 bg-[#eef5fb] rounded-xl border-none text-sm font-medium outline-none focus:bg-white focus:ring-2 focus:ring-[#3d7ab5]/10"/>
+                 <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-[#3d7ab5] hover:bg-white transition-all shadow-none hover:shadow-sm" title="Voice Input">
+                    <Mic className="w-4 h-4" />
+                 </button>
               </div>
            </div>
            
@@ -289,12 +293,15 @@ function MessagesContent() {
 
                {/* Chat Input */}
                <div className="p-6 bg-white border-t border-[#dde9f3]">
-                  <form onSubmit={sendMessage} className="flex items-center gap-4 bg-[#eef5fb] rounded-2xl px-5 py-2.5 border border-[#dde9f3]/50 focus-within:ring-2 focus-within:ring-[#3d7ab5]/10 focus-within:bg-white transition-all">
+                  <form onSubmit={sendMessage} className="flex items-center gap-4 bg-[#eef5fb] rounded-2xl px-5 py-2.5 border border-[#dde9f3]/50 focus-within:ring-2 focus-within:ring-[#3d7ab5]/10 focus-within:bg-white transition-all relative group/chat">
                      <input 
                        type="text" value={newMessage} onChange={e => setNewMessage(e.target.value)}
                        placeholder="Typing a message..." 
-                       className="flex-1 bg-transparent border-none outline-none text-sm font-medium py-2"
+                       className="flex-1 bg-transparent border-none outline-none text-sm font-medium py-2 pr-10"
                      />
+                     <button type="button" className="absolute right-20 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl flex items-center justify-center text-[#3d7ab5] hover:bg-white transition-all shadow-none hover:shadow-sm" title="Voice Message">
+                        <Mic className="w-4 h-4" />
+                     </button>
                      <button type="submit" className="bg-[#3d7ab5] text-white p-3 rounded-xl shadow-lg hover:bg-[#2c5f8a] transition-all active:scale-90">
                         <Send className="w-4 h-4" />
                      </button>

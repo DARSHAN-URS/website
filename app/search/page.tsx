@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Search as SearchIcon, MapPin, Star, MessageSquare } from "lucide-react";
+import { Search as SearchIcon, MapPin, Star, MessageSquare, Mic } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function SearchPage() {
@@ -16,7 +16,7 @@ export default function SearchPage() {
     let query = supabase.from("employees").select("*");
     
     if (searchQuery) {
-      query = query.or(`full_name.ilike.%${searchQuery}%,bio.ilike.%${searchQuery}%`);
+      query = query.or(`full_name.ilike.%${searchQuery}%,work_details.ilike.%${searchQuery}%`);
     }
 
     const { data, error } = await query.limit(20);
@@ -45,15 +45,20 @@ export default function SearchPage() {
         <p className="text-[#6b7f93] font-medium mt-1">Find skilled help in your neighborhood</p>
       </header>
 
-      <form onSubmit={handleSearch} className="bg-[#eef5fb] border-[1.5px] border-[#dde9f3] rounded-3xl p-6 flex items-center gap-4 mb-10 shadow-sm">
+      <form onSubmit={handleSearch} className="bg-[#eef5fb] border-[1.5px] border-[#dde9f3] rounded-3xl p-6 flex items-center gap-4 mb-10 shadow-sm relative group/search">
         <SearchIcon className="text-[#3d7ab5] w-6 h-6" />
-        <input 
-          type="text" 
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Try 'Painter', 'Plumber' or a name..." 
-          className="bg-transparent border-none flex-1 outline-none font-medium text-lg text-[#1a2533] placeholder:text-[#6b7f93]/50"
-        />
+        <div className="flex-1 flex items-center gap-2">
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Try 'Painter', 'Plumber' or a name..." 
+              className="bg-transparent border-none flex-1 outline-none font-medium text-lg text-[#1a2533] placeholder:text-[#6b7f93]/50"
+            />
+            <button type="button" className="w-10 h-10 rounded-full flex items-center justify-center text-[#3d7ab5] hover:bg-white transition-all shadow-none hover:shadow-sm" title="Voice Search">
+               <Mic className="w-5 h-5" />
+            </button>
+        </div>
         <button type="submit" className="bg-[#3d7ab5] text-white px-8 py-3 rounded-2xl font-bold hover:bg-[#2c5f8a] transition-all">Search</button>
       </form>
 

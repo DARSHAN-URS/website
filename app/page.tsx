@@ -60,14 +60,14 @@ export default function Home() {
 
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 md:px-[60px] py-4 bg-white/95 backdrop-blur-md border-b border-[#dde9f3] transition-all duration-300">
-        <Link href="/" className="flex items-center gap-2.5 no-underline">
-          <svg className="w-[34px] h-[34px]" viewBox="0 0 80 80" fill="none">
-            <path d="M16 36 Q20 18 40 16 Q60 18 64 36 Q58 50 40 52 Q22 50 16 36Z" fill="#3d7ab5" fillOpacity="0.9"/>
-            <path d="M20 36 Q24 22 40 20 Q56 22 60 36" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            <circle cx="36" cy="51" r="2.2" fill="white"/>
-            <circle cx="40" cy="53" r="2.2" fill="white"/>
-            <circle cx="44" cy="51" r="2.2" fill="white"/>
-            <rect x="38" y="53" width="4" height="9" rx="2" fill="#3d7ab5"/>
+        <Link href="/" className="flex items-center gap-2.5 no-underline group">
+          <svg className="w-[42px] h-[30px] transition-transform group-hover:scale-105" viewBox="0 0 100 60" fill="none">
+            <path d="M10 45C10 45 25 10 50 10C75 10 90 45 90 45L75 55C75 55 65 30 50 30C35 30 25 55 25 55L10 45Z" fill="white" stroke="#3d7ab5" strokeWidth="6" strokeLinejoin="round"/>
+            <path d="M45 42L50 54L55 42" stroke="#3d7ab5" strokeWidth="4" strokeLinecap="round"/>
+            <circle cx="50" cy="50" r="2" fill="#3d7ab5"/>
+
+
+
           </svg>
           <div className="font-serif text-2xl font-extrabold text-[#3d7ab5] tracking-tight">Laborgro</div>
         </Link>
@@ -78,9 +78,13 @@ export default function Home() {
           <Link href="#workers" className="no-underline text-[#6b7f93] text-[0.9rem] font-medium transition-colors duration-200 hover:text-[#3d7ab5]">For Workers</Link>
           <Link href="#languages" className="no-underline text-[#6b7f93] text-[0.9rem] font-medium transition-colors duration-200 hover:text-[#3d7ab5]">Languages</Link>
         </div>
-        <div className="flex gap-2.5 items-center">
-          <Link href="/login" className="px-5 py-2.25 rounded-full border-[1.5px] border-[#c8dff0] text-[#3d7ab5] no-underline text-[0.88rem] font-semibold transition-all duration-200 hover:bg-[#eef5fb]">Log In</Link>
-          <Link href="/signup" className="bg-[#3d7ab5] text-white px-5.5 py-2.25 rounded-full text-[0.88rem] font-semibold no-underline transition-all duration-200 shadow-[0_4px_12px_rgba(61,122,181,0.3)] hover:bg-[#2c5f8a] hover:-translate-y-px">Get Started Free →</Link>
+        <div className="flex gap-4 items-center">
+          <Link href="/login" className="px-6 py-2.5 rounded-full border border-[#c8dff0] text-[#3d7ab5] no-underline text-[0.9rem] font-semibold transition-all duration-300 hover:bg-[#f0f7ff] hover:border-[#3d7ab5]">
+            Log In
+          </Link>
+          <Link href="/signup" className="bg-[#3d7ab5] text-white px-8 py-2.5 rounded-full text-[0.9rem] font-semibold no-underline transition-all duration-300 shadow-[0_4px_14px_rgba(61,122,181,0.25)] hover:bg-[#2c5f8a] hover:shadow-[0_6px_20px_rgba(61,122,181,0.35)] hover:-translate-y-0.5 active:translate-y-0">
+            Sign Up
+          </Link>
         </div>
       </nav>
 
@@ -97,9 +101,9 @@ export default function Home() {
           <p className="text-[1.1rem] text-[#6b7f93] leading-[1.7] max-w-[480px] mb-9 animate-[fadeUp_0.6s_0.2s_ease_both]">
             From house cleaning to security guards — find verified, nearby workers in your city within minutes. Chat, call & pay securely — all in one app.
           </p>
-          <div className="flex gap-3.5 flex-wrap mb-12 animate-[fadeUp_0.6s_0.3s_ease_both]">
-            <Link href="/dashboard" className="bg-[#3d7ab5] text-white px-7 py-3.5 rounded-full text-[0.95rem] font-bold no-underline transition-all duration-200 shadow-[0_4px_20px_rgba(61,122,181,0.35)] inline-flex items-center gap-2 hover:bg-[#2c5f8a] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(61,122,181,0.45)]">Hire a Worker →</Link>
-            <Link href="#workers" className="bg-transparent text-[#3d7ab5] px-7 py-3.5 rounded-full text-[0.95rem] font-bold no-underline border-2 border-[#c8dff0] inline-flex items-center gap-2 transition-all duration-200 hover:border-[#3d7ab5] hover:bg-[#eef5fb]">🔨 Find Work</Link>
+          <div className="flex gap-4 flex-wrap mb-12 animate-[fadeUp_0.6s_0.3s_ease_both]">
+            <Link href="/dashboard" className="bg-[#3d7ab5] text-white px-8 py-4 rounded-full text-[1rem] font-bold no-underline transition-all duration-300 shadow-[0_4px_20px_rgba(61,122,181,0.3)] inline-flex items-center gap-2 hover:bg-[#2c5f8a] hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(61,122,181,0.4)]">Hire a Worker →</Link>
+            <Link href="#workers" className="bg-transparent text-[#3d7ab5] px-8 py-4 rounded-full text-[1rem] font-bold no-underline border-2 border-[#c8dff0] inline-flex items-center gap-2 transition-all duration-300 hover:border-[#3d7ab5] hover:bg-[#f0f7ff]">🔨 Find Work</Link>
           </div>
           <div className="flex gap-9 animate-[fadeUp_0.6s_0.4s_ease_both] flex-wrap">
             <div className="border-l-[3px] border-[#c8dff0] pl-4"><div className="font-serif text-[1.8rem] font-extrabold text-[#3d7ab5]">50K+</div><div className="text-[0.82rem] text-[#6b7f93] mt-0.5">Verified Workers</div></div>
@@ -108,7 +112,7 @@ export default function Home() {
           </div>
         </div>
         <div className="hidden lg:flex flex-col gap-3.5 animate-[fadeRight_0.8s_0.3s_ease_both] relative z-10">
-          <div className="bg-white border-[1.5px] border-[#dde9f3] rounded-[16px] p-[18px] shadow-[0_4px_20px_rgba(61,122,181,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(61,122,181,0.15)] hover:border-[#c8dff0] bg-gradient-to-br from-[#3d7ab5] to-[#2c5f8a] border-transparent">
+          <div className="bg-white border border-[#dde9f3] rounded-[20px] p-5 shadow-[0_4px_24px_rgba(61,122,181,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(61,122,181,0.15)] hover:border-[#c8dff0] bg-gradient-to-br from-[#3d7ab5] to-[#2c5f8a] border-transparent shadow-lg text-white">
             <div className="flex items-center gap-3.5 mb-3">
               <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-[1.4rem] shrink-0">👨‍🎨</div>
               <div>
@@ -120,11 +124,11 @@ export default function Home() {
             <div className="flex items-center gap-2.5 flex-wrap">
               <span className="px-2.5 py-1 rounded-full text-[0.7rem] font-bold bg-white/20 text-white">✓ Verified</span>
               <span className="px-2.5 py-1 rounded-full text-[0.7rem] font-bold bg-white/20 text-white">🟢 Available Now</span>
-              <Link href="/dashboard" className="ml-auto bg-white text-[#3d7ab5] border-none px-4 py-1.75 rounded-full font-bold text-[0.8rem] transition-all no-underline">Hire Now</Link>
+              <Link href="/dashboard" className="ml-auto bg-white text-[#3d7ab5] border-none px-5 py-2 rounded-full font-bold text-[0.85rem] transition-all no-underline hover:bg-white/90 hover:scale-105 active:scale-95">Hire Now</Link>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3.5">
-            <div className="bg-white border-[1.5px] border-[#dde9f3] rounded-[16px] p-[18px] shadow-[0_4px_20px_rgba(61,122,181,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(61,122,181,0.15)] hover:border-[#c8dff0]">
+            <div className="bg-white border border-[#dde9f3] rounded-[20px] p-5 shadow-[0_4px_24px_rgba(61,122,181,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(61,122,181,0.15)] hover:border-[#c8dff0]">
               <div className="flex items-center gap-3.5 mb-2">
                 <div className="w-[36px] h-[36px] rounded-full bg-[#eef5fb] flex items-center justify-center text-[1rem] shrink-0">👩‍🍳</div>
                 <div>
@@ -137,7 +141,7 @@ export default function Home() {
                 <span className="ml-auto font-serif font-extrabold text-[#3d7ab5] text-[0.9rem]">₹350/day</span>
               </div>
             </div>
-            <div className="bg-white border-[1.5px] border-[#dde9f3] rounded-[16px] p-[18px] shadow-[0_4px_20px_rgba(61,122,181,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(61,122,181,0.15)] hover:border-[#c8dff0]">
+            <div className="bg-white border border-[#dde9f3] rounded-[20px] p-5 shadow-[0_4px_24px_rgba(61,122,181,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(61,122,181,0.15)] hover:border-[#c8dff0]">
               <div className="flex items-center gap-3.5 mb-2">
                 <div className="w-[36px] h-[36px] rounded-full bg-[#eef5fb] flex items-center justify-center text-[1rem] shrink-0">👨‍🔧</div>
                 <div>
@@ -236,10 +240,13 @@ export default function Home() {
         </div>
         <div className="reveal">
           <div className="bg-white rounded-[24px] p-7 shadow-[0_8px_40px_rgba(61,122,181,0.12)]">
-            <div className="bg-[#eef5fb] border-[1.5px] border-[#dde9f3] rounded-full p-[12px_18px] flex items-center gap-2.5 mb-4">
-              <span>🔍</span>
-              <input type="text" value="Painter in Noida" readOnly className="bg-transparent border-none flex-1 font-sans text-[0.9rem] text-[#1a2533] outline-none"/>
-              <button className="bg-[#3d7ab5] text-white border-none p-[8px_18px] rounded-full font-semibold cursor-pointer text-[0.85rem]">Search</button>
+            <div className="bg-[#f0f7ff] border border-[#c8dff0] rounded-full p-1.5 flex items-center gap-3 mb-4 shadow-sm relative group/search">
+              <span className="ml-3 text-[#3d7ab5]">🔍</span>
+              <input type="text" value="Painter in Noida" readOnly className="bg-transparent border-none flex-1 font-sans text-[0.95rem] text-[#1a2533] outline-none"/>
+              <div className="flex items-center gap-2 px-2 border-r border-[#c8dff0] mr-1">
+                 <button className="w-8 h-8 rounded-full flex items-center justify-center text-[#3d7ab5] hover:bg-white transition-all" title="Voice Search">🎙️</button>
+              </div>
+              <button className="bg-[#3d7ab5] text-white border-none px-6 py-2.5 rounded-full font-bold cursor-pointer text-[0.88rem] transition-all hover:bg-[#2c5f8a] shadow-sm">Search</button>
             </div>
             <div className="flex flex-col gap-2.5">
               {[
@@ -292,9 +299,92 @@ export default function Home() {
                   <div key={j} className="text-[0.85rem] text-[#6b7f93] flex items-center gap-2 before:content-['✓'] before:text-[#1a8c4e] before:font-extrabold shrink-0">{f}</div>
                 ))}
               </div>
-              <button className={`w-full p-3.25 rounded-[13px] font-bold text-[0.9rem] cursor-pointer transition-all duration-200 ${plan.popular?'bg-[#3d7ab5] text-white border-none':'bg-[#eef5fb] text-[#3d7ab5] border-2 border-[#c8dff0] hover:bg-[#3d7ab5] hover:text-white hover:border-[#3d7ab5]'}`}>Post {plan.name} Job</button>
+              <button className={`w-full py-4 rounded-[16px] font-bold text-[1rem] cursor-pointer transition-all duration-300 ${plan.popular?'bg-[#3d7ab5] text-white border-none shadow-[0_4px_12px_rgba(61,122,181,0.2)] hover:bg-[#2c5f8a] hover:shadow-[0_6px_20px_rgba(61,122,181,0.3)]':'bg-[#f0f7ff] text-[#3d7ab5] border-2 border-[#c8dff0] hover:bg-[#3d7ab5] hover:text-white hover:border-[#3d7ab5]'}`}>Post {plan.name} Job</button>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* FOR WORKERS */}
+      <section id="workers" className="py-24 px-6 md:px-[60px] bg-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-[#f0f7ff] rounded-l-[100px] -z-10 translate-x-20 opacity-50"></div>
+        <div className="reveal grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <div className="text-[0.82rem] font-bold text-[#3d7ab5] tracking-[2px] uppercase mb-3 text-left">For Skilled Workers</div>
+            <h2 className="font-serif text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.1] mb-6 text-[#1a2533]">Start earning more with <em className="italic text-[#3d7ab5]">zero commission</em></h2>
+            <p className="text-[#6b7f93] text-[1.1rem] leading-[1.7] mb-10 max-w-[500px]">Join India's fastest-growing platform for blue-collar workers. Get job alerts in your local language, talk directly to customers, and keep 100% of what you earn.</p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+               {[
+                 { icon: '💰', title: '0% Commission', desc: 'Keep all your earnings. We don\'t take a cut from your hard work.' },
+                 { icon: '📱', title: 'Direct Access', desc: 'Chat and call customers directly. No middleman involved.' },
+                 { icon: '🗺️', title: 'Local Jobs', desc: 'Find work within 2-5km of your location to save on travel.' },
+                 { icon: '💬', title: 'Speak & Work', desc: 'Full support for 8 Indian languages. Use your voice to search.' }
+               ].map((item, i) => (
+                 <div key={i} className="flex gap-4">
+                   <div className="w-10 h-10 rounded-xl bg-[#eef5fb] text-[#3d7ab5] flex items-center justify-center text-[1.2rem] shrink-0 font-bold">{item.icon}</div>
+                   <div>
+                     <div className="font-bold text-[0.95rem] mb-1">{item.title}</div>
+                     <div className="text-[#6b7f93] text-[0.82rem] leading-[1.5]">{item.desc}</div>
+                   </div>
+                 </div>
+               ))}
+            </div>
+
+            <div className="flex gap-4">
+              <Link href="/signup" className="bg-[#3d7ab5] text-white px-10 py-4 rounded-full text-[1rem] font-bold no-underline transition-all duration-300 shadow-[0_4px_20px_rgba(61,122,181,0.3)] hover:bg-[#2c5f8a] hover:-translate-y-0.5">Join as Worker →</Link>
+            </div>
+          </div>
+          
+          <div className="relative">
+            <div className="bg-[#eef5fb] rounded-[40px] p-8 md:p-12 relative z-10 border border-[#c8dff0]">
+               <div className="flex items-center gap-4 mb-8">
+                  <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-2xl shadow-sm">👨‍🔧</div>
+                  <div>
+                    <div className="font-bold text-lg">Worker Dashboard</div>
+                    <div className="text-[#3d7ab5] text-sm font-bold">🟢 Active & Looking for Work</div>
+                  </div>
+               </div>
+               
+               <div className="space-y-4">
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#dde9f3] flex items-center justify-between">
+                     <div>
+                        <div className="text-[0.7rem] font-bold text-[#6b7f93] uppercase tracking-wider mb-1">New Job Alert</div>
+                        <div className="font-bold text-[0.95rem]">Need Carpenter for Wardrobe</div>
+                     </div>
+                     <div className="text-[#3d7ab5] font-serif font-extrabold">₹600</div>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#dde9f3] flex items-center justify-between opacity-60">
+                     <div>
+                        <div className="text-[0.7rem] font-bold text-[#6b7f93] uppercase tracking-wider mb-1">2 hours ago</div>
+                        <div className="font-bold text-[0.95rem]">House Cleaning Service</div>
+                     </div>
+                     <div className="text-[#3d7ab5] font-serif font-extrabold">₹350</div>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#dde9f3] flex items-center justify-between">
+                     <div>
+                        <div className="text-[0.7rem] font-bold text-[#6b7f93] uppercase tracking-wider mb-1">In-App Chat</div>
+                        <div className="font-bold text-[0.95rem]">"Available for job today?"</div>
+                     </div>
+                     <button className="bg-[#1a8c4e] text-white px-4 py-1.5 rounded-full text-[0.75rem] font-bold">Reply</button>
+                  </div>
+               </div>
+
+               <div className="mt-8 pt-8 border-t border-[#c8dff0] flex justify-between items-center">
+                  <div>
+                    <div className="text-[0.7rem] font-bold text-[#6b7f93] uppercase mb-1">Monthly Earnings</div>
+                    <div className="font-serif text-2xl font-extrabold text-[#1a2533]">₹14,500</div>
+                  </div>
+                  <div className="flex -space-x-3">
+                    {[1,2,3,4].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-[#dde9f3]"></div>)}
+                    <div className="w-8 h-8 rounded-full border-2 border-white bg-[#3d7ab5] text-white text-[0.6rem] flex items-center justify-center font-bold">+12</div>
+                  </div>
+               </div>
+            </div>
+            {/* Decorative elements */}
+            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#3d7ab5]/10 rounded-full blur-3xl -z-10"></div>
+            <div className="absolute -top-6 -left-6 w-32 h-32 bg-[#3d7ab5]/10 rounded-full blur-3xl -z-10"></div>
+          </div>
         </div>
       </section>
 
@@ -316,7 +406,18 @@ export default function Home() {
                 { code: 'kn', label: 'ಕನ್ನಡ' },
                 { code: 'gu', label: 'ગુજરાતી' }
               ].map((l, i) => (
-                <button key={i} data-lang={l.code} onClick={() => setLang(l.code)} className={`px-[18px] py-2 rounded-full border-2 border-white/30 text-white text-[0.82rem] font-bold cursor-pointer transition-all ${i===0?'on bg-white text-[#3d7ab5] border-white':'bg-white/10 hover:bg-white hover:text-[#3d7ab5] hover:border-white'}`}>{l.label}</button>
+                <button
+                  key={i}
+                  data-lang={l.code}
+                  onClick={() => setLang(l.code)}
+                  className={`lang-btn px-5 py-2.5 rounded-full border-2 border-white/30 text-[0.88rem] font-bold cursor-pointer transition-all duration-300 ${
+                    i === 0
+                      ? 'on bg-white text-[#3d7ab5] border-white'
+                      : 'text-white bg-white/10 hover:bg-white hover:text-[#3d7ab5] hover:border-white'
+                  }`}
+                >
+                  {l.label}
+                </button>
               ))}
             </div>
           </div>
@@ -355,14 +456,44 @@ export default function Home() {
             <p className="text-[0.85rem] leading-[1.6] max-w-[280px]">India's trusted platform connecting skilled blue-collar workers with customers. 8 languages, live map, in-app chat & calls.</p>
           </div>
           {[
-            { title: 'Services', links: ['Painting', 'Carpentry', 'House Cleaning', 'Plumbing', 'Electrician', 'Security Guard', 'Car Wash', 'Office Staff'] },
-            { title: 'Company', links: ['About Us', 'How it Works', 'For Workers', 'Pricing', 'Safety', 'Contact'] },
-            { title: 'Legal', links: ['Privacy Policy', 'Terms of Service', 'Refund Policy', 'Worker Agreement'] }
+            { 
+              title: 'Services', 
+              links: [
+                { name: 'Painting', href: '#services' },
+                { name: 'Carpentry', href: '#services' },
+                { name: 'House Cleaning', href: '#services' },
+                { name: 'Plumbing', href: '#services' },
+                { name: 'Electrician', href: '#services' },
+                { name: 'Security Guard', href: '#services' },
+                { name: 'Car Wash', href: '#services' },
+                { name: 'Office Staff', href: '#services' }
+              ] 
+            },
+            { 
+              title: 'Company', 
+              links: [
+                { name: 'About Us', href: '#' },
+                { name: 'How it Works', href: '#how' },
+                { name: 'For Workers', href: '#workers' },
+                { name: 'Pricing', href: '#pricing' },
+                { name: 'Safety', href: '#' },
+                { name: 'Contact', href: '#' }
+              ] 
+            },
+            { 
+              title: 'Legal', 
+              links: [
+                { name: 'Privacy Policy', href: '#' },
+                { name: 'Terms of Service', href: '#' },
+                { name: 'Refund Policy', href: '#' },
+                { name: 'Worker Agreement', href: '#' }
+              ] 
+            }
           ].map((col, i) => (
             <div key={i}>
               <h4 className="text-white font-bold mb-4 text-[0.88rem]">{col.title}</h4>
               {col.links.map((link, j) => (
-                <Link key={j} href="#" className="block text-white/50 no-underline text-[0.85rem] mb-2.25 transition-colors hover:text-white">{link}</Link>
+                <Link key={j} href={link.href} className="block text-white/50 no-underline text-[0.85rem] mb-2.25 transition-colors hover:text-white">{link.name}</Link>
               ))}
             </div>
           ))}

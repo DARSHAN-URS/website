@@ -85,13 +85,12 @@ export default function ProfilePage() {
         });
         setFullName(mappedName);
         setPhone(data.phone || "");
-        setBio(data.bio || "");
+        setBio(data.work_details || "");
         setCity(data.city || "");
         setSkills(data.skills || []);
         setHourlyRate(data.hourly_rate || 0);
         setCategory(data.category || "General Professional");
         setIsAvailable(data.is_available ?? true);
-        setSkills(data.skills || []);
       } else {
         setProfile({ email: session.user.email, full_name: "New Profile" });
       }
@@ -128,17 +127,13 @@ export default function ProfilePage() {
 
     if (role === 'employer') {
         updates.company_name = fullName;
-        updates.city = city;
     } else {
         updates.full_name = fullName;
         updates.phone = phone;
-        updates.bio = bio;
+        updates.work_details = bio;
         updates.city = city;
         updates.skills = skills;
-        updates.hourly_rate = hourlyRate;
-        updates.category = category;
         updates.is_available = isAvailable;
-        updates.skills = skills;
     }
 
     const { error } = await supabase.from(table).upsert(updates);
@@ -327,7 +322,7 @@ export default function ProfilePage() {
                        {isEditing ? (
                          <textarea rows={4} value={bio} onChange={e => setBio(e.target.value)} className="w-full bg-[#eef5fb] rounded-xl px-4 py-3 text-sm font-bold border-none outline-none focus:ring-2 focus:ring-[#3d7ab5]/10 resize-none"></textarea>
                        ) : (
-                         <div className="bg-[#f8fafd] rounded-xl px-4 py-4 text-sm font-medium leading-relaxed text-[#6b7f93]">{profile?.bio}</div>
+                         <div className="bg-[#f8fafd] rounded-xl px-4 py-4 text-sm font-medium leading-relaxed text-[#6b7f93]">{profile?.work_details}</div>
                        )}
                     </div>
 
