@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [workers, setWorkers] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function initCheck() {
@@ -52,7 +53,22 @@ export default function Dashboard() {
       setLoading(false);
     }
     
+    async function fetchAppliedJobs() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from("applications")
+        .select("job_id")
+        .eq("worker_id", session.user.id);
+
+      if (data) {
+        setAppliedJobIds(new Set(data.map(app => app.job_id)));
+      }
+    }
+    
     initCheck();
+    fetchAppliedJobs();
   }, [role, router, setUser]);
 
   const handleHire = (worker: any) => {
@@ -74,6 +90,7 @@ export default function Dashboard() {
       else alert("Application failed: " + error.message);
     } else {
       alert(`Application submitted for ${job.title}!`);
+      setAppliedJobIds(prev => new Set([...Array.from(prev), job.id]));
       router.push('/applied');
     }
   };
@@ -378,12 +395,17 @@ export default function Dashboard() {
                         >
                           Chat
                         </button>
-                        <button 
-                          onClick={() => handleApply(job)}
-                          className="bg-[#3d7ab5] text-white px-6 py-2 rounded-xl font-bold text-xs hover:bg-[#2c5f8a] transition-all"
-                        >
-                          Apply Now
-                        </button>
+                         <button 
+                           onClick={() => handleApply(job)}
+                           disabled={appliedJobIds.has(job.id)}
+                           className={`px-6 py-2 rounded-xl font-bold text-xs transition-all ${
+                             appliedJobIds.has(job.id)
+                               ? "bg-gray-100 text-[#1a8c4e] border border-[#b7e4cd] cursor-default"
+                               : "bg-[#3d7ab5] text-white hover:bg-[#2c5f8a]"
+                           }`}
+                         >
+                           {appliedJobIds.has(job.id) ? "Applied" : "Apply Now"}
+                         </button>
                       </div>
                   </div>
                 </div>

@@ -36,6 +36,8 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
+  const [applyingId, setApplyingId] = useState<string | null>(null);
   
   // New Job Form State
   const [title, setTitle] = useState("");
@@ -66,6 +68,20 @@ export default function JobsPage() {
     setLoading(false);
   }
 
+  async function fetchAppliedJobs() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data, error } = await supabase
+      .from("applications")
+      .select("job_id")
+      .eq("worker_id", session.user.id);
+
+    if (data) {
+      setAppliedJobIds(new Set(data.map(app => app.job_id)));
+    }
+  }
+
   useEffect(() => {
     async function initCheck() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -77,6 +93,7 @@ export default function JobsPage() {
       
       setUser(session.user);
       fetchJobs(session.user.id);
+      fetchAppliedJobs();
     }
     
     initCheck();
@@ -138,6 +155,32 @@ export default function JobsPage() {
     const { error } = await supabase.from("jobs").delete().eq("id", id);
     if (error) alert(error.message);
     else await fetchJobs();
+  }
+
+  async function handleApplyJob(jobId: string) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return alert("Please log in first");
+    
+    if (role !== 'worker') {
+      return alert("Only workers can apply for jobs. Please switch your role in settings if you're a worker.");
+    }
+
+    setApplyingId(jobId);
+    const { error } = await supabase.from("applications").insert([
+      {
+        job_id: jobId,
+        worker_id: session.user.id,
+        status: "pending"
+      }
+    ]);
+
+    if (error) {
+      alert("Error applying: " + error.message);
+    } else {
+      alert("Application submitted successfully!");
+      setAppliedJobIds(prev => new Set([...Array.from(prev), jobId]));
+    }
+    setApplyingId(null);
   }
 
   return (
@@ -202,7 +245,27 @@ export default function JobsPage() {
                           <button onClick={() => handleDeleteJob(job.id)} className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-500 hover:bg-red-100 transition-all"><Trash2 className="w-5 h-5" /></button>
                        </div>
                     ) : (
-                       <button className="bg-[#3d7ab5] text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg hover:bg-[#2c5f8a] transition-all active:scale-95">Apply for Job</button>
+                       <button 
+                         onClick={() => handleApplyJob(job.id)}
+                         disabled={appliedJobIds.has(job.id) || applyingId === job.id}
+                         className={`px-8 py-3.5 rounded-2xl font-bold shadow-lg transition-all active:scale-95 ${
+                           appliedJobIds.has(job.id) 
+                             ? "bg-gray-100 text-[#1a8c4e] border border-[#b7e4cd] cursor-default" 
+                             : "bg-[#3d7ab5] text-white hover:bg-[#2c5f8a]"
+                         }`}
+                       >
+                         {applyingId === job.id ? (
+                           <div className="flex items-center gap-2">
+                             <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                             Applying...
+                           </div>
+                         ) : appliedJobIds.has(job.id) ? (
+                           <div className="flex items-center gap-2">
+                             <CheckCircle2 className="w-4 h-4" />
+                             Applied
+                           </div>
+                         ) : "Apply for Job"}
+                       </button>
                     )}
                   </div>
                 </div>
