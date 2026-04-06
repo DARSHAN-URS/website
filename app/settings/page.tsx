@@ -22,7 +22,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function SettingsPage() {
-  const { user, setRole, setUser } = useUserStore();
+  const { user, setUser, role, setRole, language: storeLanguage, setLanguage: setStoreLanguage } = useUserStore();
   const router = useRouter();
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("English");
@@ -35,9 +35,56 @@ export default function SettingsPage() {
         router.replace('/login');
         return;
       }
+      
+      // Fetch current settings from DB
+      const table = role === 'employer' ? 'employers' : 'employees';
+      const { data, error } = await supabase
+        .from(table)
+        .select("language, notifications_enabled")
+        .eq("id", session.user.id)
+        .single();
+      
+      if (data) {
+        if (data.language) {
+          setLanguage(data.language === 'HI' ? 'हिन्दी' : 'English');
+          setStoreLanguage(data.language);
+        }
+        if (data.notifications_enabled !== undefined) setNotifications(data.notifications_enabled);
+      }
     }
     initCheck();
-  }, [router]);
+  }, [router, role, setStoreLanguage]);
+
+  const updateSetting = async (key: string, value: any) => {
+    const table = role === 'employer' ? 'employers' : 'employees';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { error } = await supabase
+      .from(table)
+      .update({ [key]: value })
+      .eq("id", session.user.id);
+    
+    if (error) {
+      console.warn(`Could not update ${key} in DB (column might not exist):`, error.message);
+    }
+  };
+
+  const toggleNotifications = async () => {
+    const newVal = !notifications;
+    setNotifications(newVal);
+    await updateSetting('notifications_enabled', newVal);
+  };
+
+  const toggleLanguage = async () => {
+    const isCurrentlyEnglish = language === "English";
+    const newDisplay = isCurrentlyEnglish ? "हिन्दी" : "English";
+    const newCode = isCurrentlyEnglish ? "HI" : "EN";
+    
+    setLanguage(newDisplay);
+    setStoreLanguage(newCode);
+    await updateSetting('language', newCode);
+  };
 
   const handleLogout = async () => {
     setLoading(true);
@@ -80,8 +127,8 @@ export default function SettingsPage() {
       icon: Globe, 
       color: "#1a8c4e", 
       items: [
-        { name: `Language: ${language}`, action: () => setLanguage(prev => prev === "English" ? "हिन्दी" : "English") },
-        { name: `Push Notifications: ${notifications ? 'On' : 'Off'}`, action: () => setNotifications(!notifications) },
+        { name: `Language: ${language}`, action: toggleLanguage },
+        { name: `Push Notifications: ${notifications ? 'On' : 'Off'}`, action: toggleNotifications },
       ] 
     },
     { 

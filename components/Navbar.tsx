@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import NotificationCenter from "./NotificationCenter";
 
 export default function Navbar() {
   const { user, role } = useUserStore();
@@ -54,10 +55,7 @@ export default function Navbar() {
          </div>
          
          <div className="flex items-center gap-3">
-            <button className="w-11 h-11 bg-white border border-[#dde9f3] rounded-2xl flex items-center justify-center text-[#6b7f93] hover:text-[#3d7ab5] hover:bg-[#eef5fb] transition-all relative">
-               <Bell className="w-5 h-5" />
-               <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+            <NotificationCenter />
             <Link href="/profile" className="w-11 h-11 bg-white border border-[#dde9f3] rounded-2xl flex items-center justify-center text-[#1a2533] hover:bg-[#eef5fb] transition-all cursor-pointer">
                <UserIcon className="w-5 h-5" />
             </Link>

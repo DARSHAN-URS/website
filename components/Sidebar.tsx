@@ -15,25 +15,30 @@ import {
 import { useUserStore } from "@/lib/store";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { translations } from "@/lib/translations";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { role, setRole, logout } = useUserStore();
+  const { role, setRole, logout, language } = useUserStore();
   const router = useRouter();
 
+  const t = translations[language as keyof typeof translations] || translations.EN;
+
   const hireNavItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-    { name: "Search", icon: Search, path: "/search" },
-    { name: "Posted Jobs", icon: Briefcase, path: "/jobs" },
-    { name: "Bookings", icon: Calendar, path: "/bookings" },
-    { name: "Profile", icon: User, path: "/profile" },
+    { name: t.dashboard, icon: LayoutDashboard, path: "/dashboard" },
+    { name: t.search, icon: Search, path: "/search" },
+    { name: t.jobs, icon: Briefcase, path: "/jobs" },
+    { name: t.bookings, icon: Calendar, path: "/bookings" },
+    { name: t.profile, icon: User, path: "/profile" },
+    { name: t.settings, icon: Settings, path: "/settings" },
   ];
 
   const workNavItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-    { name: "Search", icon: Search, path: "/jobs" },
-    { name: "Applied", icon: CheckCircle, path: "/applied" },
-    { name: "Profile", icon: User, path: "/profile" },
+    { name: t.dashboard, icon: LayoutDashboard, path: "/dashboard" },
+    { name: t.search, icon: Search, path: "/jobs" },
+    { name: t.applied, icon: CheckCircle, path: "/applied" },
+    { name: t.settings, icon: Settings, path: "/settings" },
+    { name: t.profile, icon: User, path: "/profile" },
   ];
 
   const navItems = role === 'employer' ? hireNavItems : workNavItems;

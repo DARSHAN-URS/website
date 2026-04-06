@@ -31,12 +31,18 @@ export default function BookingsPage() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    // Join with employees table to get worker name/avatar
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("*, worker:employees(*)")
-      .eq("customer_id", session.user.id)
-      .order("created_at", { ascending: false });
+    const { role } = useUserStore.getState();
+
+    // If role is employer, we see workers we hired. If role is worker, we see employers who hired us.
+    const query = supabase.from("bookings").select("*, worker:employees(*), customer:employers(*)");
+    
+    if (role === 'employer') {
+       query.eq("customer_id", session.user.id);
+    } else {
+       query.eq("worker_id", session.user.id);
+    }
+    
+    const { data, error } = await query.order("created_at", { ascending: false });
 
     if (data) setBookings(data);
     if (error) console.error("Bookings fetch error:", error.message);
@@ -114,18 +120,22 @@ export default function BookingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {bookings.map((booking) => {
             const style = getStatusStyle(booking.status);
+            const { role } = useUserStore.getState();
+            const person = role === 'employer' ? booking.worker : booking.customer;
+            const personName = role === 'employer' ? person?.full_name : person?.company_name || 'Customer';
+
             return (
               <div key={booking.id} className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full">
                 {/* Header: User & Status */}
                 <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-[22px] bg-[#f8fafd] flex items-center justify-center text-3xl shadow-inner border border-[#eef5fb] group-hover:scale-110 transition-transform duration-300">
-                         {booking.worker?.avatar_url || "👨🏾‍🔧"}
+                         {person?.avatar_url || (role === 'employer' ? "👨🏾‍🔧" : "👤")}
                       </div>
                       <div>
-                         <h3 className="font-extrabold text-[#1a2533] text-lg mb-1 leading-none">{booking.worker?.full_name || 'Service Professional'}</h3>
+                         <h3 className="font-extrabold text-[#1a2533] text-lg mb-1 leading-none">{personName || 'Service Professional'}</h3>
                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-extrabold text-[#3d7ab5] uppercase tracking-widest">{booking.worker?.category || 'General Help'}</span>
+                            <span className="text-[10px] font-extrabold text-[#3d7ab5] uppercase tracking-widest">{role === 'employer' ? person?.category || 'General Help' : 'Customer'}</span>
                             <span className="text-[10px] font-bold text-[#6b7f93] bg-[#f8fafd] px-2 py-0.5 rounded-full border border-gray-50 uppercase tracking-widest">REF: {booking.booking_ref}</span>
                          </div>
                       </div>
@@ -175,7 +185,7 @@ export default function BookingsPage() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 mt-auto">
                    <button 
-                     onClick={() => router.push(`/messages?user_id=${booking.worker_id}`)}
+                     onClick={() => router.push(`/messages?user_id=${role === 'employer' ? booking.worker_id : booking.customer_id}`)}
                      className="flex-1 bg-white border border-[#dde9f3] text-[#1a2533] py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#eef5fb] transition-all"
                    >
                       <MessageSquare className="w-4 h-4 text-[#3d7ab5]" /> Chat

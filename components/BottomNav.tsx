@@ -12,24 +12,29 @@ import {
   Calendar
 } from "lucide-react";
 import { useUserStore } from "@/lib/store";
+import { translations } from "@/lib/translations";
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { role } = useUserStore();
+  const { role, language } = useUserStore();
+
+  const t = translations[language as keyof typeof translations] || translations.EN;
 
   const hireNavItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-    { name: "Search", icon: Search, path: "/search" },
-    { name: "Jobs", icon: Briefcase, path: "/jobs" },
-    { name: "Bookings", icon: Calendar, path: "/bookings" },
-    { name: "Profile", icon: User, path: "/profile" },
+    { name: t.dashboard, icon: LayoutDashboard, path: "/dashboard" },
+    { name: t.search, icon: Search, path: "/search" },
+    { name: t.jobs, icon: Briefcase, path: "/jobs" },
+    { name: t.bookings, icon: Calendar, path: "/bookings" },
+    { name: t.settings, icon: Settings, path: "/settings" },
+    { name: t.profile, icon: User, path: "/profile" },
   ];
 
   const workNavItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-    { name: "Search", icon: Search, path: "/jobs" },
-    { name: "Applied", icon: CheckCircle, path: "/applied" },
-    { name: "Profile", icon: User, path: "/profile" },
+    { name: t.dashboard, icon: LayoutDashboard, path: "/dashboard" },
+    { name: t.search, icon: Search, path: "/jobs" },
+    { name: t.applied, icon: CheckCircle, path: "/applied" },
+    { name: t.settings, icon: Settings, path: "/settings" },
+    { name: t.profile, icon: User, path: "/profile" },
   ];
 
   const navItems = role === 'employer' ? hireNavItems : workNavItems;

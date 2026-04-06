@@ -15,7 +15,8 @@ import {
   Check,
   CheckCheck,
   MessageSquare,
-  Mic
+  Mic,
+  ArrowLeft
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -34,6 +35,7 @@ function MessagesContent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [activeChat, setActiveChat] = useState<any>(null);
+  const [showChat, setShowChat] = useState(false);
   const [chats, setChats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -163,9 +165,11 @@ function MessagesContent() {
 
         if (target) {
           setActiveChat(target);
+          setShowChat(true);
         } else if (partnerIds.has(newPartnerId)) {
            const placeholder = { id: newPartnerId, name: "Staff User", avatar: "👤", role: "Contact", lastMsg: "Starting conversation...", status: "online" };
            setActiveChat(placeholder);
+           setShowChat(true);
         }
       }
     } catch (err) {
@@ -205,9 +209,9 @@ function MessagesContent() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-84px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-84px)] md:h-[calc(100vh-84px)] overflow-hidden relative">
       {/* Left Sidebar: Conversations */}
-        <div className="w-[380px] bg-white border-r border-[#dde9f3] flex flex-col h-full">
+        <div className={`w-full md:w-[380px] bg-white border-r border-[#dde9f3] flex flex-col h-full transition-all duration-300 ${showChat && activeChat ? 'hidden md:flex' : 'flex'}`}>
            <div className="p-6 border-b border-[#dde9f3]">
               <h1 className="text-2xl font-extrabold text-[#1a2533] font-serif mb-5">Messages</h1>
               <div className="relative group/search">
@@ -223,7 +227,7 @@ function MessagesContent() {
               {chats.map((chat) => (
                 <div 
                   key={chat.id} 
-                  onClick={() => setActiveChat(chat)}
+                  onClick={() => { setActiveChat(chat); setShowChat(true); }}
                   className={`p-5 flex items-center gap-4 cursor-pointer transition-all border-b border-[#f8fafd] ${activeChat?.id === chat.id ? 'bg-[#eef5fb] border-l-4 border-l-[#3d7ab5]' : 'hover:bg-gray-50'}`}
                 >
                    <div className="relative shrink-0">
@@ -248,22 +252,23 @@ function MessagesContent() {
         </div>
 
         {/* Main Content: Chat Window */}
-        <div className="flex-1 bg-[#fdfdfd] flex flex-col h-full">
+        <div className={`flex-1 bg-[#fdfdfd] flex flex-col h-full transition-all duration-300 ${!showChat || !activeChat ? 'hidden md:flex' : 'flex'}`}>
            {activeChat ? (
              <>
                {/* Chat Header */}
-               <div className="p-5 bg-white border-b border-[#dde9f3] flex items-center justify-between shadow-sm relative z-10">
-                  <div className="flex items-center gap-3.5">
-                     <div className="w-10 h-10 rounded-full bg-[#eef5fb] flex items-center justify-center text-lg shrink-0">
-                        {activeChat.avatar}
-                     </div>
-                     <div>
-                        <h2 className="text-[15px] font-bold text-[#1a2533]">{activeChat.name}</h2>
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#1a8c4e] uppercase tracking-widest mt-0.5">
-                           <span className="w-1.5 h-1.5 rounded-full bg-[#1a8c4e]"></span> {activeChat.status === 'online' ? 'Active Now' : 'Away'}
-                        </div>
-                     </div>
-                  </div>
+                <div className="p-4 md:p-5 bg-white border-b border-[#dde9f3] flex items-center justify-between shadow-sm relative z-10">
+                   <div className="flex items-center gap-3.5">
+                      <button onClick={() => setShowChat(false)} className="md:hidden p-2 -ml-2 text-[#6b7f93] hover:text-[#3d7ab5] transition-colors"><ArrowLeft className="w-6 h-6" /></button>
+                      <div className="w-10 h-10 rounded-full bg-[#eef5fb] flex items-center justify-center text-lg shrink-0">
+                         {activeChat.avatar}
+                      </div>
+                      <div>
+                         <h2 className="text-sm md:text-[15px] font-bold text-[#1a2533]">{activeChat.name}</h2>
+                         <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] font-bold text-[#1a8c4e] uppercase tracking-widest mt-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#1a8c4e]"></span> {activeChat.status === 'online' ? 'Active' : 'Away'}
+                         </div>
+                      </div>
+                   </div>
                   <div className="flex items-center gap-2">
                      <button className="p-2.5 rounded-xl hover:bg-gray-50 text-[#3d7ab5] transition-all"><Phone className="w-5 h-5" /></button>
                      <button className="p-2.5 rounded-xl hover:bg-gray-50 text-[#6b7f93] transition-all"><MoreVertical className="w-5 h-5" /></button>
@@ -271,7 +276,7 @@ function MessagesContent() {
                </div>
 
                {/* Chat Messages */}
-               <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-gradient-to-b from-white to-[#f8fafd]">
+               <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-gradient-to-b from-white to-[#f8fafd]">
                   {messages.map((msg, i) => {
                     const isUser = msg.sender_id === user?.id;
                     return (

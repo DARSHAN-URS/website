@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { useUserStore } from "@/lib/store";
 import { 
   Calendar, 
   Clock, 
@@ -11,11 +12,8 @@ import {
   AlertCircle, 
   MessageSquare, 
   ArrowLeft,
-  CreditCard,
   ShieldCheck,
   Phone,
-  User as UserIcon,
-  Briefcase
 } from "lucide-react";
 import Link from "next/link";
 
@@ -24,13 +22,14 @@ export default function BookingDetailsPage() {
   const router = useRouter();
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { role } = useUserStore();
 
   useEffect(() => {
     async function fetchBookingDetails() {
       setLoading(true);
       const { data, error } = await supabase
         .from("bookings")
-        .select("*, worker:employees(*)")
+        .select("*, worker:employees(*), customer:employers(*)")
         .eq("id", params.id)
         .single();
 
@@ -57,6 +56,23 @@ export default function BookingDetailsPage() {
 
   const isPending = booking.status === 'pending';
   const isCompleted = booking.status === 'completed';
+  const isAccepted = booking.status === 'accepted';
+  
+  const person = role === 'employer' ? booking.worker : booking.customer;
+  const personName = role === 'employer' ? person?.full_name : person?.company_name || 'Customer';
+
+  const updateStatus = async (newStatus: string) => {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: newStatus })
+      .eq('id', booking.id);
+    
+    if (!error) {
+      setBooking({ ...booking, status: newStatus });
+    } else {
+      alert("Error updating status: " + error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8fafd] p-6 lg:p-12">
@@ -137,43 +153,64 @@ export default function BookingDetailsPage() {
               </div>
            </div>
 
-           {/* Right: Worker Profile Card */}
+           {/* Right: Profile Card */}
            <div className="space-y-8">
               <div className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm text-center">
                  <div className="relative mx-auto w-24 h-24 mb-6">
                     <div className="w-full h-full rounded-[28px] bg-[#f8fafd] border-2 border-white shadow-lg flex items-center justify-center text-4xl">
-                       {booking.worker?.avatar_url || "👨🏾‍🔧"}
+                       {person?.avatar_url || (role === 'employer' ? "👨🏾‍🔧" : "👤")}
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white border border-gray-100 rounded-xl shadow-md flex items-center justify-center text-[#1a8c4e]">
                        <ShieldCheck className="w-5 h-5 fill-current" />
                     </div>
                  </div>
                  
-                 <h2 className="text-xl font-extrabold text-[#1a2533] mb-1">{booking.worker?.full_name}</h2>
-                 <p className="text-[#6b7f93] font-bold text-[10px] uppercase tracking-widest mb-6">{booking.worker?.category || 'Professional Provider'}</p>
+                 <h2 className="text-xl font-extrabold text-[#1a2533] mb-1">{personName}</h2>
+                 <p className="text-[#6b7f93] font-bold text-[10px] uppercase tracking-widest mb-6">{role === 'employer' ? (person?.category || 'Professional Provider') : 'Employer'}</p>
 
                  <div className="flex items-center justify-center gap-6 mb-8 border-y border-gray-50 py-4">
                     <div>
-                       <p className="text-[#1a2533] font-extrabold">{booking.worker?.rating || '4.8'}</p>
+                       <p className="text-[#1a2533] font-extrabold">{person?.rating || '4.8'}</p>
                        <p className="text-[9px] font-bold text-[#6b7f93] uppercase tracking-wider">Rating</p>
                     </div>
                     <div className="w-px h-6 bg-gray-100"></div>
                     <div>
-                       <p className="text-[#1a2533] font-extrabold">{booking.worker?.total_jobs || '120+'}</p>
-                       <p className="text-[9px] font-bold text-[#6b7f93] uppercase tracking-wider">Jobs</p>
+                       <p className="text-[#1a2533] font-extrabold">{person?.total_jobs || (role === 'employer' ? '120+' : '5+')}</p>
+                       <p className="text-[9px] font-bold text-[#6b7f93] uppercase tracking-wider">{role === 'employer' ? 'Jobs' : 'Posted'}</p>
                     </div>
                  </div>
 
                  <div className="space-y-3">
                     <button 
-                      onClick={() => router.push(`/messages?user_id=${booking.worker_id}`)}
+                      onClick={() => router.push(`/messages?user_id=${role === 'employer' ? booking.worker_id : booking.customer_id}`)}
                       className="w-full bg-[#3d7ab5] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#2c5f8a] transition-all shadow-lg shadow-[#3d7ab5]/20"
                     >
-                       <MessageSquare className="w-4 h-4" /> Message Worker
+                       <MessageSquare className="w-4 h-4" /> Message {role === 'employer' ? 'Worker' : 'Customer'}
                     </button>
-                    <button className="w-full bg-white border border-[#dde9f3] text-[#1a2533] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#f8fafd] transition-all">
-                       <Phone className="w-4 h-4 text-[#3d7ab5]" /> Call Agent
-                    </button>
+                    {role === 'worker' && isPending && (
+                      <button 
+                        onClick={() => updateStatus('accepted')}
+                        className="w-full bg-[#1a8c4e] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#157340] transition-all shadow-lg shadow-[#1a8c4e]/20"
+                      >
+                         <CheckCircle2 className="w-4 h-4" /> Accept Job
+                      </button>
+                    )}
+                    {role === 'worker' && isAccepted && (
+                      <button 
+                        onClick={() => updateStatus('completed')}
+                        className="w-full bg-[#1a8c4e] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#157340] transition-all shadow-lg shadow-[#1a8c4e]/20"
+                      >
+                         <CheckCircle2 className="w-4 h-4" /> Mark as Completed
+                      </button>
+                    )}
+                    {(isPending || isAccepted) && (
+                      <button 
+                        onClick={() => updateStatus('cancelled')}
+                        className="w-full bg-white border border-red-100 text-red-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
+                      >
+                        <AlertCircle className="w-4 h-4" /> Cancel Booking
+                      </button>
+                    )}
                  </div>
               </div>
 
