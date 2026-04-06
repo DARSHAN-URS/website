@@ -140,6 +140,16 @@ export default function SettingsPage() {
         { name: "Transaction History" },
       ] 
     },
+    { 
+      group: "Help & Legal", 
+      icon: ShieldCheck, 
+      color: "#6b7f93", 
+      items: [
+        { name: "Terms and Conditions", action: () => router.push('/terms') },
+        { name: "Privacy Policy", action: () => router.push('/privacy') },
+        { name: "Support: laborgrow@gmail.com", action: () => window.location.href = 'mailto:laborgrow@gmail.com' },
+      ] 
+    },
   ];
 
   return (
