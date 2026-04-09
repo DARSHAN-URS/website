@@ -2,19 +2,15 @@
 
 import React from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-[#fdfdfd] text-[#1a2533]">
       {/* Simple Header */}
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 md:px-[60px] py-4 bg-white/95 backdrop-blur-md border-b border-[#dde9f3]">
-        <Link href="/" className="flex items-center gap-2.5 no-underline group">
-          <svg className="w-[42px] h-[30px]" viewBox="0 0 100 60" fill="none">
-            <path d="M10 45C10 45 25 10 50 10C75 10 90 45 90 45L75 55C75 55 65 30 50 30C35 30 25 55 25 55L10 45Z" fill="white" stroke="#3d7ab5" strokeWidth="6" strokeLinejoin="round"/>
-            <path d="M45 42L50 54L55 42" stroke="#3d7ab5" strokeWidth="4" strokeLinecap="round"/>
-            <circle cx="50" cy="50" r="2" fill="#3d7ab5"/>
-          </svg>
-          <div className="font-serif text-2xl font-extrabold text-[#3d7ab5] tracking-tight">Laborgro</div>
+        <Link href="/" className="block">
+          <Logo size="lg" />
         </Link>
         <Link href="/" className="text-[#3d7ab5] font-semibold text-sm hover:underline">Back to Home</Link>
       </nav>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import Logo from '@/components/Logo';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -42,11 +43,8 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-[#eef5fb] p-6">
       <div className="bg-white p-10 rounded-[28px] shadow-xl w-full max-w-md border border-[#dde9f3]">
         <div className="text-center mb-8">
-           <Link href="/" className="inline-flex items-center gap-2 mb-4">
-             <svg className="w-10 h-10" viewBox="0 0 80 80" fill="none">
-               <path d="M16 36 Q20 18 40 16 Q60 18 64 36 Q58 50 40 52 Q22 50 16 36Z" fill="#3d7ab5"/>
-             </svg>
-             <span className="font-serif text-2xl font-extrabold text-[#3d7ab5]">Laborgro</span>
+           <Link href="/" className="mb-4 block">
+             <Logo size="lg" className="justify-center" />
            </Link>
            <h2 className="text-2xl font-bold">Welcome Back</h2>
            <p className="text-[#6b7f93]">Sign in to access your account</p>

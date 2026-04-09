@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function Home() {
   useEffect(() => {
@@ -60,15 +61,8 @@ export default function Home() {
 
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 md:px-[60px] py-3.5 md:py-4 bg-white/80 backdrop-blur-xl border-b border-[#dde9f3]/50 transition-all duration-300">
-        <Link href="/" className="flex items-center gap-2.5 no-underline group shrink-0">
-          <div className="relative w-9 h-9 md:w-[42px] md:h-[30px] flex items-center justify-center">
-            <svg className="w-full h-full transition-transform group-hover:scale-110" viewBox="0 0 100 60" fill="none">
-              <path d="M10 45C10 45 25 10 50 10C75 10 90 45 90 45L75 55C75 55 65 30 50 30C35 30 25 55 25 55L10 45Z" fill="white" stroke="#3d7ab5" strokeWidth="6" strokeLinejoin="round"/>
-              <path d="M45 42L50 54L55 42" stroke="#3d7ab5" strokeWidth="4" strokeLinecap="round"/>
-              <circle cx="50" cy="50" r="2" fill="#3d7ab5"/>
-            </svg>
-          </div>
-          <div className="font-serif text-xl md:text-2xl font-extrabold text-[#3d7ab5] tracking-tight">Laborgro</div>
+        <Link href="/" className="shrink-0 block">
+          <Logo size="lg" />
         </Link>
         <div className="hidden lg:flex gap-8 items-center">
           <Link href="#services" className="no-underline text-[#6b7f93] text-[0.9rem] font-medium transition-colors duration-200 hover:text-[#3d7ab5]">Services</Link>
@@ -483,11 +477,8 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#3d7ab5]/20 to-transparent"></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
           <div className="col-span-1 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-3 no-underline mb-8">
-              <svg className="w-10 h-10" viewBox="0 0 100 60" fill="none">
-                <path d="M10 45C10 45 25 10 50 10C75 10 90 45 90 45L75 55C75 55 65 30 50 30C35 30 25 55 25 55L10 45Z" fill="#3d7ab5" />
-              </svg>
-              <div className="font-serif text-2xl text-white font-extrabold tracking-tight">Laborgro</div>
+            <Link href="/" className="mb-8 block">
+              <Logo size="lg" variant="white" />
             </Link>
             <p className="text-[0.95rem] leading-[1.8] max-w-[300px] mb-8">
               Empowering India's blue-collar workforce through language-first technology and direct-to-customer connection.

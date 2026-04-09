@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import Logo from "./Logo";
 import NotificationCenter from "./NotificationCenter";
 
 export default function Navbar() {
@@ -28,12 +29,8 @@ export default function Navbar() {
       <div className="flex items-center gap-6 flex-1 max-w-2xl">
          <div className="lg:hidden flex items-center gap-4 border-r border-[#dde9f3] pr-6">
             <Menu className="w-6 h-6 text-[#1a2533]" />
-            <Link href="/" className="flex items-center gap-2 group">
-              <svg className="w-10 h-7 transition-transform group-hover:scale-110" viewBox="0 0 100 60" fill="none">
-                <path d="M10 45C10 45 25 10 50 10C75 10 90 45 90 45L75 55C75 55 65 30 50 30C35 30 25 55 25 55L10 45Z" fill="white" stroke="#3d7ab5" strokeWidth="6" strokeLinejoin="round"/>
-                <path d="M45 30L50 42L55 30" stroke="#3d7ab5" strokeWidth="4" strokeLinecap="round"/>
-              </svg>
-              <span className="font-serif text-xl font-extrabold text-[#3d7ab5]">Laborgro</span>
+            <Link href="/" className="block">
+              <Logo size="md" />
             </Link>
          </div>
          <div className="hidden md:flex lg:flex-1 items-center gap-3">
