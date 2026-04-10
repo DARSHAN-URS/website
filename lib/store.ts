@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface UserState {
   user: any | null;
@@ -10,12 +11,19 @@ interface UserState {
   logout: () => void;
 }
 
-export const useUserStore = create<UserState>((set) => ({
-  user: null,
-  role: 'employer',
-  language: 'EN',
-  setUser: (user) => set({ user }),
-  setRole: (role) => set({ role }),
-  setLanguage: (language) => set({ language }),
-  logout: () => set({ user: null }),
-}));
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      user: null,
+      role: 'employer',
+      language: 'EN',
+      setUser: (user) => set({ user }),
+      setRole: (role) => set({ role }),
+      setLanguage: (language) => set({ language }),
+      logout: () => set({ user: null }),
+    }),
+    {
+      name: 'user-storage',
+    }
+  )
+);

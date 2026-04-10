@@ -37,6 +37,7 @@ export default function HireWorkerPage() {
 
   useEffect(() => {
     async function fetchWorker() {
+      if (!params || !params.id) return;
       setLoading(true);
       const { data, error } = await supabase
         .from("employees")
@@ -49,8 +50,8 @@ export default function HireWorkerPage() {
       setLoading(false);
     }
 
-    if (params.id) fetchWorker();
-  }, [params.id]);
+    if (params?.id) fetchWorker();
+  }, [params?.id]);
 
   const handleUseMyLocation = () => {
     setIsLocating(true);

@@ -64,5 +64,6 @@ export const config = {
     "/jobs/:path*",
     "/messages/:path*",
     "/settings/:path*",
+    "/admin/:path*",
   ],
 };

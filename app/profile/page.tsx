@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { translations } from "@/lib/translations";
 
 export default function ProfilePage() {
-  const { user, role, setUser, language } = useUserStore();
+  const { user, role, setUser, setRole, language } = useUserStore();
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -48,12 +48,34 @@ export default function ProfilePage() {
         return;
       }
 
-      const table = role === 'employer' ? 'employers' : 'employees';
-      const { data, error } = await supabase
-        .from(table)
+      const userId = session.user.id;
+
+      // Auto-detect: try the current role's table first, then fallback to the other.
+      // This handles the case where Zustand role resets to 'employer' on page refresh.
+      const primaryTable = role === 'employer' ? 'employers' : 'employees';
+      const fallbackTable = role === 'employer' ? 'employees' : 'employers';
+
+      let { data, error } = await supabase
+        .from(primaryTable)
         .select("*")
-        .eq("id", session.user.id)
+        .eq("id", userId)
         .single();
+
+      if (!data) {
+        // Primary table had no row — try the other table
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from(fallbackTable)
+          .select("*")
+          .eq("id", userId)
+          .single();
+
+        if (fallbackData) {
+          data = fallbackData;
+          // Correct the Zustand role so the rest of the page works properly
+          const correctRole = fallbackTable === 'employees' ? 'worker' : 'employer';
+          setRole(correctRole as 'employer' | 'worker');
+        }
+      }
 
       if (data) {
         setProfile(data);
@@ -61,11 +83,14 @@ export default function ProfilePage() {
         setPhone(data.phone || "");
         setHourlyRate(data.hourly_rate?.toString() || "");
         setWorkDetails(data.work_details || "");
+      } else {
+        console.error("Profile not found in either table for user:", userId);
       }
+
       setLoading(false);
     }
     fetchProfile();
-  }, [user, role, router]);
+  }, [role, router]);
 
   const handleUpdate = async () => {
     const table = role === 'employer' ? 'employers' : 'employees';
