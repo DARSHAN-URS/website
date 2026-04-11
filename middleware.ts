@@ -6,18 +6,10 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
-  // Security check: Ensure environment variables are present
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("MIDDLEWARE ERROR: Missing Supabase Environment Variables");
-    return supabaseResponse; // Let it through so the client-side can handle it
-  }
-
+  // Hardcoded URL for build reliability
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    'https://bixrgczukyudjoprsjyp.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
@@ -37,12 +29,9 @@ export async function middleware(request: NextRequest) {
   )
 
   try {
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
 
     // HYBRID CHECK: 
-    // If getUser() succeeds, we're good.
-    // If it fails, we check if there's any Supabase auth cookie at all.
-    // This prevents "false negative" redirects on platforms like Netlify.
     const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token'));
 
     if (!user && !hasAuthCookie) {
@@ -51,9 +40,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url)
     }
   } catch (e) {
-    console.error("Middleware Auth Error:", e);
-    // On error, we allow the request to continue to the client-side
-    // This is safer than a redirect loop
     return supabaseResponse;
   }
 

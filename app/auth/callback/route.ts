@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const response = NextResponse.redirect(`${origin}${next}`)
 
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      'https://bixrgczukyudjoprsjyp.supabase.co',
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
