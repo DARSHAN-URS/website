@@ -10,6 +10,10 @@ export async function GET(request: Request) {
 
   if (code) {
     const cookieStore = await cookies()
+    
+    // We create a custom response first so we can manually attach cookies
+    const response = NextResponse.redirect(`${origin}${next}`)
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,17 +23,23 @@ export async function GET(request: Request) {
             return cookieStore.get(name)?.value
           },
           set(name: string, value: string, options: CookieOptions) {
+            // Update the cookie store and the response object
             cookieStore.set({ name, value, ...options })
+            response.cookies.set({ name, value, ...options })
           },
           remove(name: string, options: CookieOptions) {
+            // Update the cookie store and the response object
             cookieStore.set({ name, value: '', ...options })
+            response.cookies.set({ name, value: '', ...options })
           },
         },
       }
     )
+
     const { error } = await supabase.auth.exchangeCodeForSession(code)
+    
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+      return response
     }
   }
 
