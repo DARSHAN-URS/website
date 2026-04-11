@@ -95,9 +95,12 @@ export default function ProfilePage() {
   const handleUpdate = async () => {
     const table = role === 'employer' ? 'employers' : 'employees';
     const updateData: any = {
-      phone: phone,
       updated_at: new Date().toISOString(),
     };
+
+    if (phone && role === 'worker') {
+        updateData.phone = phone;
+    }
 
     if (role === 'employer') {
         updateData.company_name = fullName;
@@ -207,14 +210,16 @@ export default function ProfilePage() {
                            <div className="flex items-center gap-2.5 text-sm font-bold text-[#1a2533] uppercase"><User className="w-4 h-4 text-[#3d7ab5]" /> {profile?.full_name || profile?.company_name || 'Not provided'}</div>
                          )}
                       </div>
-                      <div className="space-y-1.5">
-                         <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block">Contact Number</label>
-                         {editing ? (
-                           <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full bg-[#f8fafd] border-b-2 border-[#dde9f3] py-2 outline-none focus:border-[#3d7ab5] text-sm font-bold"/>
-                         ) : (
-                           <div className="flex items-center gap-2.5 text-sm font-bold text-[#1a2533] uppercase"><Phone className="w-4 h-4 text-[#3d7ab5]" /> {profile?.phone || 'Not linked'}</div>
-                         )}
-                      </div>
+                      {role === 'worker' && (
+                        <div className="space-y-1.5">
+                           <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block">Contact Number</label>
+                           {editing ? (
+                             <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full bg-[#f8fafd] border-b-2 border-[#dde9f3] py-2 outline-none focus:border-[#3d7ab5] text-sm font-bold"/>
+                           ) : (
+                             <div className="flex items-center gap-2.5 text-sm font-bold text-[#1a2533] uppercase"><Phone className="w-4 h-4 text-[#3d7ab5]" /> {profile?.phone || 'Not linked'}</div>
+                           )}
+                        </div>
+                      )}
                       {role === 'worker' && (
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block">Daily Rate (8 hrs)</label>
