@@ -1,87 +1,60 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Create an initial response
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  // 1. Create an initial response
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
 
+  // 2. Initialize Supabase client with the most robust cookie handling (getAll/setAll)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
+        getAll() {
+          return request.cookies.getAll()
         },
-        set(name: string, value: string, options: CookieOptions) {
-          // If the cookie is being set, update both the request and the response
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: CookieOptions) {
-          // If the cookie is being removed, update both the request and the response
-          request.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value: "",
-            ...options,
-          });
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
     }
-  );
+  )
 
-  // IMPORTANT: Use getUser() for security and to trigger session refresh if needed
-  const { data: { user } } = await supabase.auth.getUser();
+  // 3. Refresh session if needed
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Redirect to login if user is not authenticated and is trying to access a protected route
-  // The matcher below handles which routes are protected
+  // 4. Redirect to login if NO user is found and they are trying to access a protected route
+  // Note: The 'matcher' in the config below ensures this only runs on protected pages
   if (!user) {
-    const redirectUrl = new URL("/login", request.url);
-    // Use redirected response
-    const redirectResponse = NextResponse.redirect(redirectUrl);
-    
-    // Copy cookies from our active 'response' to the redirect response
-    // This ensures that even if we redirect back to login, we don't lose the refreshed session state
-    response.cookies.getAll().forEach((cookie) => {
-        redirectResponse.cookies.set(cookie.name, cookie.value);
-    });
-    
-    return redirectResponse;
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
-  return response;
+  // 5. Return the response (with any refreshed cookies)
+  return supabaseResponse
 }
 
-// Routes matching this config will trigger the middleware
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - login (login page)
+     * - signup (signup page)
+     * - auth (auth callback route)
+     */
     "/dashboard/:path*",
     "/profile/:path*",
     "/jobs/:path*",
@@ -89,4 +62,4 @@ export const config = {
     "/settings/:path*",
     "/admin/:path*",
   ],
-};
+}
