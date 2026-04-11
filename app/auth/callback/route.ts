@@ -33,6 +33,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=auth-code-error`)
+  // FALLBACK: If no code is found, redirect to dashboard anyway.
+  // This allows the browser to process any #access_token fragments client-side.
+  return NextResponse.redirect(`${origin}/dashboard`)
 }
