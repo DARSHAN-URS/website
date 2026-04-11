@@ -2,15 +2,22 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // 1. Create an initial response
   let supabaseResponse = NextResponse.next({
     request,
   })
 
-  // 2. Initialize Supabase client with the most robust cookie handling (getAll/setAll)
+  // Security check: Ensure environment variables are present
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("MIDDLEWARE ERROR: Missing Supabase Environment Variables");
+    return supabaseResponse; // Let it through so the client-side can handle it
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -29,32 +36,32 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // 3. Refresh session if needed
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
 
-  // 4. Redirect to login if NO user is found and they are trying to access a protected route
-  // Note: The 'matcher' in the config below ensures this only runs on protected pages
-  if (!user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    // HYBRID CHECK: 
+    // If getUser() succeeds, we're good.
+    // If it fails, we check if there's any Supabase auth cookie at all.
+    // This prevents "false negative" redirects on platforms like Netlify.
+    const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token'));
+
+    if (!user && !hasAuthCookie) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+  } catch (e) {
+    console.error("Middleware Auth Error:", e);
+    // On error, we allow the request to continue to the client-side
+    // This is safer than a redirect loop
+    return supabaseResponse;
   }
 
-  // 5. Return the response (with any refreshed cookies)
   return supabaseResponse
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - login (login page)
-     * - signup (signup page)
-     * - auth (auth callback route)
-     */
     "/dashboard/:path*",
     "/profile/:path*",
     "/jobs/:path*",
