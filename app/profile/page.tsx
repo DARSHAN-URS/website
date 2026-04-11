@@ -79,7 +79,7 @@ export default function ProfilePage() {
 
       if (data) {
         setProfile(data);
-        setFullName(data.full_name || "");
+        setFullName(data.full_name || data.company_name || "");
         setPhone(data.phone || "");
         setHourlyRate(data.hourly_rate?.toString() || "");
         setWorkDetails(data.work_details || "");
@@ -95,10 +95,15 @@ export default function ProfilePage() {
   const handleUpdate = async () => {
     const table = role === 'employer' ? 'employers' : 'employees';
     const updateData: any = {
-      full_name: fullName,
       phone: phone,
       updated_at: new Date().toISOString(),
     };
+
+    if (role === 'employer') {
+        updateData.company_name = fullName;
+    } else {
+        updateData.full_name = fullName;
+    }
 
     if (role === 'worker') {
       updateData.hourly_rate = parseFloat(hourlyRate);
@@ -149,7 +154,7 @@ export default function ProfilePage() {
                    </div>
 
                    <div className="text-center mb-8">
-                      <h2 className="text-2xl font-extrabold text-[#1a2533] font-serif mb-1 uppercase tracking-tight">{profile?.full_name || 'Anonymous'}</h2>
+                      <h2 className="text-2xl font-extrabold text-[#1a2533] font-serif mb-1 uppercase tracking-tight">{profile?.full_name || profile?.company_name || 'Anonymous'}</h2>
                       <div className="flex items-center justify-center gap-1.5 text-[10px] font-extrabold text-[#3d7ab5] uppercase tracking-[2px]">
                          <Star className="w-3.5 h-3.5 fill-current" /> 4.9 · {role === 'employer' ? 'Premium Employer' : 'Expert Professional'}
                       </div>
@@ -195,11 +200,11 @@ export default function ProfilePage() {
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-1.5">
-                         <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block">Full Name</label>
+                         <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block">{role === 'employer' ? 'Company Name' : 'Full Name'}</label>
                          {editing ? (
                            <input value={fullName} onChange={e => setFullName(e.target.value)} className="w-full bg-[#f8fafd] border-b-2 border-[#dde9f3] py-2 outline-none focus:border-[#3d7ab5] text-sm font-bold"/>
                          ) : (
-                           <div className="flex items-center gap-2.5 text-sm font-bold text-[#1a2533] uppercase"><User className="w-4 h-4 text-[#3d7ab5]" /> {profile?.full_name || 'Not provided'}</div>
+                           <div className="flex items-center gap-2.5 text-sm font-bold text-[#1a2533] uppercase"><User className="w-4 h-4 text-[#3d7ab5]" /> {profile?.full_name || profile?.company_name || 'Not provided'}</div>
                          )}
                       </div>
                       <div className="space-y-1.5">
