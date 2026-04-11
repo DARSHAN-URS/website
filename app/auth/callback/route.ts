@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = await cookies()
     
-    // We create a custom response first so we can manually attach cookies
+    // We create a custom response first so we can attach cookies to it reliably
     const response = NextResponse.redirect(`${origin}${next}`)
 
     const supabase = createServerClient(
@@ -19,18 +19,15 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
+          getAll() {
+            return cookieStore.getAll()
           },
-          set(name: string, value: string, options: CookieOptions) {
-            // Update the cookie store and the response object
-            cookieStore.set({ name, value, ...options })
-            response.cookies.set({ name, value, ...options })
-          },
-          remove(name: string, options: CookieOptions) {
-            // Update the cookie store and the response object
-            cookieStore.set({ name, value: '', ...options })
-            response.cookies.set({ name, value: '', ...options })
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+              // Ensure Next.js also attaches the cookie to this specific response object
+              response.cookies.set(name, value, options)
+            })
           },
         },
       }
@@ -39,11 +36,13 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
+      console.log('Google Auth Exchange Success! Forwarding to Dashboard:');
       return response
+    } else {
+      console.error('Google Auth Exchange Error:', error);
     }
   }
 
-  // FALLBACK: If no code is found, redirect to dashboard anyway.
-  // This allows the browser to process any #access_token fragments client-side.
-  return NextResponse.redirect(`${origin}/dashboard`)
+  // FALLBACK
+  return NextResponse.redirect(`${origin}/login?error=GoogleLoginFailed`)
 }
