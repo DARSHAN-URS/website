@@ -16,6 +16,7 @@ import {
   Star
 } from "lucide-react";
 import Link from "next/link";
+import { bookingApi } from "@/lib/api";
 
 export default function HireWorkerPage() {
   const params = useParams();
@@ -84,31 +85,26 @@ export default function HireWorkerPage() {
 
     setSubmitting(true);
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!session || !session.access_token) {
       router.push("/login");
       return;
     }
 
-    const bookingRef = `LBG-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    const totalAmount = (worker?.hourly_rate || 150) * 4 + 50; // Rate * 4hrs + fee
-
-    const { error } = await supabase.from('bookings').insert([
-      {
-        customer_id: session.user.id,
+    try {
+      const bookingData = {
         worker_id: worker.id,
-        status: 'pending',
-        booking_ref: bookingRef,
-        total_amount: totalAmount,
+        category_id: worker.category_id || 1, // Defaulting to 1 if not provided
         booking_date: selectedDate,
         time_slot: selectedTime,
+        hours: 8, // Standard daily wage duration
         address: address
-      }
-    ]);
+      };
 
-    if (!error) {
+      await bookingApi.createBooking(bookingData, session.access_token);
       router.push("/bookings");
-    } else {
-      alert("Booking failed: " + error.message);
+    } catch (err: any) {
+      console.error("Booking error:", err);
+      alert("Booking failed: " + (err.response?.data?.detail || err.message || "Unknown error"));
       setSubmitting(false);
     }
   };
@@ -240,7 +236,7 @@ export default function HireWorkerPage() {
                     <div className="h-px bg-[#dde9f3] my-4"></div>
                     <div className="flex justify-between items-baseline">
                        <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-[#1a2533]">Final Booking Total</span>
-                       <span className="text-3xl font-extrabold text-[#1a2533] font-serif">₹{worker.hourly_rate * 4 + 50}</span>
+                       <span className="text-3xl font-extrabold text-[#1a2533] font-serif">₹{worker.hourly_rate * 8 + 50}</span>
                     </div>
                     <p className="text-[9px] text-[#6b7f93] font-bold uppercase mt-2 tracking-wider">*Includes platform convenience fee</p>
                  </div>
