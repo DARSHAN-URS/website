@@ -55,12 +55,12 @@ export const adminApi = {
 
 export const bookingApi = {
   createBooking: (data: any, token: string) => 
-    api.post('/api/v1/bookings', data, {
+    api.post('/bookings', data, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => res.data),
   
   getUserBookings: (token: string) => 
-    api.get('/api/v1/bookings', {
+    api.get('/bookings', {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => res.data),
 };
