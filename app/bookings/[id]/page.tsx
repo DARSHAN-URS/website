@@ -29,7 +29,7 @@ export default function BookingDetailsPage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("bookings")
-        .select("*, worker:employees(*), customer:employers(*)")
+        .select("*, worker:employees(*)")
         .eq("id", params.id)
         .single();
 
@@ -59,7 +59,9 @@ export default function BookingDetailsPage() {
   const isAccepted = booking.status === 'accepted';
   
   const person = role === 'employer' ? booking.worker : booking.customer;
-  const personName = role === 'employer' ? person?.full_name : person?.company_name || 'Customer';
+  // Handle worker nested user object vs customer flat object
+  const personName = role === 'employer' ? person?.user?.name : person?.name || 'Customer';
+  const avatar = role === 'employer' ? person?.user?.profile_pic_url : person?.avatar_url;
 
   const updateStatus = async (newStatus: string) => {
     const { error } = await supabase
@@ -157,8 +159,8 @@ export default function BookingDetailsPage() {
            <div className="space-y-8">
               <div className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm text-center">
                  <div className="relative mx-auto w-24 h-24 mb-6">
-                    <div className="w-full h-full rounded-[28px] bg-[#f8fafd] border-2 border-white shadow-lg flex items-center justify-center text-4xl">
-                       {person?.avatar_url || (role === 'employer' ? "👨🏾‍🔧" : "👤")}
+                    <div className="w-full h-full rounded-[28px] bg-[#f8fafd] border-2 border-white shadow-lg flex items-center justify-center text-4xl overflow-hidden">
+                       {avatar ? <img src={avatar} className="w-full h-full object-cover" /> : (role === 'employer' ? "👨🏾‍🔧" : "👤")}
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white border border-gray-100 rounded-xl shadow-md flex items-center justify-center text-[#1a8c4e]">
                        <ShieldCheck className="w-5 h-5 fill-current" />

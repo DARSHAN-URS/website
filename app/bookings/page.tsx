@@ -117,7 +117,9 @@ export default function BookingsPage() {
             const style = getStatusStyle(booking.status);
             const { role } = useUserStore.getState();
             const person = role === 'employer' ? booking.worker : booking.customer;
-            const personName = role === 'employer' ? person?.full_name : person?.company_name || 'Customer';
+            // Handle worker nested user object vs customer flat object
+            const personName = role === 'employer' ? person?.user?.name : person?.name || 'Customer';
+            const avatar = role === 'employer' ? person?.user?.profile_pic_url : person?.avatar_url;
 
             return (
               <div key={booking.id} className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full">
@@ -125,10 +127,10 @@ export default function BookingsPage() {
                 <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-[22px] bg-[#f8fafd] flex items-center justify-center text-3xl shadow-inner border border-[#eef5fb] group-hover:scale-110 transition-transform duration-300">
-                         {person?.avatar_url || (role === 'employer' ? "👨🏾‍🔧" : "👤")}
+                         {avatar || (role === 'employer' ? "👨🏾‍🔧" : "👤")}
                       </div>
                       <div>
-                         <h3 className="font-extrabold text-[#1a2533] text-lg mb-1 leading-none">{personName || 'Service Professional'}</h3>
+                         <h3 className="font-extrabold text-[#1a2533] text-lg mb-1 leading-none">{personName}</h3>
                          <div className="flex items-center gap-2">
                             <span className="text-[10px] font-extrabold text-[#3d7ab5] uppercase tracking-widest">{role === 'employer' ? person?.category || 'General Help' : 'Customer'}</span>
                             <span className="text-[10px] font-bold text-[#6b7f93] bg-[#f8fafd] px-2 py-0.5 rounded-full border border-gray-50 uppercase tracking-widest">REF: {booking.booking_ref}</span>

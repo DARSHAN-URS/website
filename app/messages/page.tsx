@@ -88,6 +88,11 @@ function MessagesContent() {
   }, [messages]);
 
   async function fetchChats(userId: string, newPartnerId?: string | null) {
+    // Sanitize input: handle 'undefined' string literal
+    if (newPartnerId === 'undefined' || newPartnerId === 'null') {
+      newPartnerId = null;
+    }
+
     setLoading(true);
     try {
       const { data: msgs, error } = await supabase
@@ -179,7 +184,7 @@ function MessagesContent() {
   }
 
   async function fetchMessages(partnerId: string) {
-    if (!user) return;
+    if (!user || !partnerId || partnerId === 'undefined') return;
     const { data, error } = await supabase
       .from('chat_messages')
       .select('*')
