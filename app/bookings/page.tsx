@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { bookingApi } from "@/lib/api";
 
 export default function BookingsPage() {
   const { user } = useUserStore();
@@ -29,23 +30,17 @@ export default function BookingsPage() {
   async function fetchBookings() {
     setLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    const { role } = useUserStore.getState();
-
-    // If role is employer, we see workers we hired. If role is worker, we see employers who hired us.
-    const query = supabase.from("bookings").select("*, worker:employees(*), customer:employers(*)");
-    
-    if (role === 'employer') {
-       query.eq("customer_id", session.user.id);
-    } else {
-       query.eq("worker_id", session.user.id);
+    if (!session || !session.access_token) {
+      setLoading(false);
+      return;
     }
-    
-    const { data, error } = await query.order("created_at", { ascending: false });
 
-    if (data) setBookings(data);
-    if (error) console.error("Bookings fetch error:", error.message);
+    try {
+      const data = await bookingApi.getUserBookings(session.access_token);
+      setBookings(data || []);
+    } catch (error: any) {
+      console.error("Bookings fetch error:", error.message);
+    }
     setLoading(false);
   }
 
