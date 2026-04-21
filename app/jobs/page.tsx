@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import { applicationApi } from "@/lib/api";
 import { 
   Plus, 
   Search, 
@@ -169,16 +170,14 @@ export default function JobsPage() {
     }
 
     setApplyingId(jobId);
-    const { error } = await supabase.from("applications").insert([
-      { job_id: jobId, worker_id: session.user.id, status: "pending" }
-    ]);
-
-    if (error) {
-      showToast("Unable to apply. Please make sure you have completed your worker profile.", "error");
-      console.error("Application error:", error.message);
-    } else {
+    try {
+      await applicationApi.applyToJob(jobId, session.access_token!);
       showToast("Application submitted successfully!", "success");
       setAppliedJobIds(prev => new Set([...Array.from(prev), jobId]));
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || err.message;
+      showToast("Unable to apply. Please make sure you have completed your worker profile.", "error");
+      console.error("Application error:", msg);
     }
     setApplyingId(null);
   }

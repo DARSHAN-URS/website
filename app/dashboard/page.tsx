@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { MapPin, Search, Filter, Briefcase, User as UserIcon, ChevronRight, Navigation, Mic, Languages } from "lucide-react";
 import { translations, languages } from "@/lib/translations";
 import { useToast } from "@/components/ToastProvider";
+import { applicationApi } from "@/lib/api";
 
 export default function Dashboard() {
   const { role, setUser, language, setLanguage } = useUserStore();
@@ -71,27 +72,19 @@ export default function Dashboard() {
     router.push(`/hire/${worker.id}`);
   };
 
-  const handleApply = async (job: any) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return router.push('/login');
-
-    const { error } = await supabase.from('applications').insert({
-      job_id: job.id,
-      worker_id: session.user.id,
-      status: 'pending'
-    });
-
-    if (error) {
-      if (error.message.includes('unique')) {
-        showToast("You have already applied for this job!", "error");
-      } else {
-        showToast("Unable to apply. Please make sure you have completed your worker profile.", "error");
-        console.error("Application error:", error.message);
-      }
-    } else {
+    try {
+      await applicationApi.applyToJob(job.id, session.access_token!);
       showToast(`Application submitted for ${job.title}!`, "success");
       setAppliedJobIds(prev => new Set([...Array.from(prev), job.id]));
       router.push('/applied');
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || err.message;
+      if (msg.includes('unique') || msg.includes('already applied')) {
+        showToast("You have already applied for this job!", "error");
+      } else {
+        showToast("Unable to apply. Please make sure you have completed your worker profile.", "error");
+        console.error("Application error:", msg);
+      }
     }
   };
 

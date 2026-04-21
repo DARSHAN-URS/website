@@ -160,9 +160,12 @@ export default function AppliedPage() {
                       View
                    </button>
                    {(app.status === 'hired' || app.status === 'accepted') && (
-                     <button className="flex-[2] bg-[#3d7ab5] text-white py-2.5 md:py-3.5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-[#2c5f8a] shadow-lg shadow-[#3d7ab5]/10 flex items-center justify-center gap-2">
+                     <Link 
+                       href={`/messages?user_id=${app.job?.employer_id}`}
+                       className="flex-[2] bg-[#3d7ab5] text-white py-2.5 md:py-3.5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-[#2c5f8a] shadow-lg shadow-[#3d7ab5]/10 flex items-center justify-center gap-2"
+                     >
                         Get Started <ArrowRight className="w-4 h-4" />
-                     </button>
+                     </Link>
                    )}
                 </div>
               </div>

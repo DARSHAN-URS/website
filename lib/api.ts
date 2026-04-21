@@ -56,14 +56,17 @@ export const adminApi = {
   getHealth: () => api.get('/admin/monitoring/health').then(res => res.data),
 };
 
-export const bookingApi = {
-  createBooking: (data: any, token: string) => 
-    api.post('/bookings', data, {
+    }).then(res => res.data),
+};
+
+export const applicationApi = {
+  applyToJob: (jobId: string | number, token: string) => 
+    api.post('/applications', { job_id: jobId }, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => res.data),
   
-  getUserBookings: (token: string) => 
-    api.get('/bookings', {
+  updateStatus: (applicationId: string, status: string, token: string) => 
+    api.put(`/applications/${applicationId}/status`, { status }, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => res.data),
 };
