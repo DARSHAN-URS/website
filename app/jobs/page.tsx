@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
 import { 
   Plus, 
   Search, 
@@ -36,6 +37,7 @@ interface Job {
 
 export default function JobsPage() {
   const { role, user, setUser, language } = useUserStore();
+  const { showToast } = useToast();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -172,10 +174,10 @@ export default function JobsPage() {
     ]);
 
     if (error) {
-      alert("Unable to apply. Please make sure you have completed your worker profile in the Profile section before applying for jobs.");
+      showToast("Unable to apply. Please make sure you have completed your worker profile.", "error");
       console.error("Application error:", error.message);
     } else {
-      alert("Application submitted successfully!");
+      showToast("Application submitted successfully!", "success");
       setAppliedJobIds(prev => new Set([...Array.from(prev), jobId]));
     }
     setApplyingId(null);

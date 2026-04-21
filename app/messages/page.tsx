@@ -19,6 +19,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/components/ToastProvider";
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ interface Message {
 
 function MessagesContent() {
   const { user, setUser } = useUserStore();
+  const { showToast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -207,7 +209,7 @@ function MessagesContent() {
 
     const { data: newMsg, error } = await supabase.from('chat_messages').insert([msgData]).select().single();
     if (error) {
-      alert("Error sending message: " + error.message);
+      showToast("Error sending message: " + error.message, "error");
     } else {
       setNewMessage("");
       // Real-time listener will handle adding the message to the UI

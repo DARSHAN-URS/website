@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { ToastProvider } from "@/components/ToastProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <ToastProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </ToastProvider>
       </body>
     </html>
   );

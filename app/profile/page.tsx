@@ -21,11 +21,13 @@ import {
   CheckCircle2,
   ArrowLeft
 } from "lucide-react";
+import { useToast } from "@/components/ToastProvider";
 import { useRouter } from "next/navigation";
 import { translations } from "@/lib/translations";
 
 export default function ProfilePage() {
   const { user, role, setUser, setRole, language } = useUserStore();
+  const { showToast } = useToast();
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,10 @@ export default function ProfilePage() {
 
   const handleUpdate = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return alert("Please log in again.");
+    if (!session) {
+      showToast("Please log in again.", "error");
+      return;
+    }
 
     const table = role === 'employer' ? 'employers' : 'employees';
     const updateData: any = {
@@ -121,9 +126,9 @@ export default function ProfilePage() {
     if (!error) {
       setProfile({ ...profile, ...updateData });
       setEditing(false);
-      alert("Profile updated successfully!");
+      showToast("Profile updated successfully!", "success");
     } else {
-      alert("Update failed: " + error.message);
+      showToast("Update failed: " + error.message, "error");
     }
   };
 
