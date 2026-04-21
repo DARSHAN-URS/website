@@ -100,8 +100,8 @@ export default function ProfilePage() {
 
     const table = role === 'employer' ? 'employers' : 'employees';
     const updateData: any = {
-      id: session.user.id, // Ensure ID is present for upsert
-      updated_at: new Date().toISOString(),
+      id: session.user.id,
+      // removed updated_at as it doesn't exist in schema
     };
 
     if (role === 'employer') {
@@ -109,7 +109,7 @@ export default function ProfilePage() {
     } else {
         updateData.full_name = fullName;
         updateData.phone = phone;
-        updateData.hourly_rate = parseInt(hourlyRate); // Match int4 in schema
+        updateData.hourly_rate = parseInt(hourlyRate) || 0; 
         updateData.work_details = workDetails;
     }
 
