@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     // HYBRID CHECK: 
-    const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token'));
+    const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token') || c.name === 'sb-access-token');
 
     if (!user && !hasAuthCookie) {
       const url = request.nextUrl.clone()

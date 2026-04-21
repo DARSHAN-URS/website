@@ -1,11 +1,25 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import { useUserStore } from "@/lib/store";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Home() {
+  const { user, setUser } = useUserStore();
+  const [sessionChecked, setSessionChecked] = useState(false);
+
   useEffect(() => {
+    async function checkUser() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+      }
+      setSessionChecked(true);
+    }
+    checkUser();
+
     // Scroll reveal animation
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
@@ -19,7 +33,7 @@ export default function Home() {
     reveals.forEach(r => observer.observe(r));
 
     return () => observer.disconnect();
-  }, []);
+  }, [setUser]);
 
   const setLang = (code: string) => {
     const langDemos: any = {
@@ -71,12 +85,20 @@ export default function Home() {
           <Link href="#workers" className="no-underline text-[#6b7f93] text-[0.9rem] font-medium transition-colors duration-200 hover:text-[#3d7ab5]">For Workers</Link>
         </div>
         <div className="flex gap-2.5 md:gap-4 items-center">
-          <Link href="/login" className="px-4 md:px-6 py-2 md:py-2.5 rounded-full border border-[#c8dff0] text-[#3d7ab5] no-underline text-[0.82rem] md:text-[0.9rem] font-semibold transition-all duration-300 hover:bg-[#f0f7ff] hover:border-[#3d7ab5]">
-            Log In
-          </Link>
-          <Link href="/signup" className="bg-[#3d7ab5] text-white px-5 md:px-8 py-2 md:py-2.5 rounded-full text-[0.82rem] md:text-[0.9rem] font-bold no-underline transition-all duration-300 shadow-[0_4px_12px_rgba(61,122,181,0.2)] hover:bg-[#2c5f8a] hover:shadow-[0_8px_20px_rgba(61,122,181,0.3)] hover:-translate-y-0.5 active:translate-y-0 shrink-0">
-            Sign Up
-          </Link>
+          {sessionChecked && user ? (
+            <Link href="/dashboard" className="bg-[#3d7ab5] text-white px-5 md:px-8 py-2 md:py-2.5 rounded-full text-[0.82rem] md:text-[0.9rem] font-bold no-underline transition-all duration-300 shadow-[0_4px_12px_rgba(61,122,181,0.2)] hover:bg-[#2c5f8a] hover:shadow-[0_8px_20px_rgba(61,122,181,0.3)] hover:-translate-y-0.5 active:translate-y-0 shrink-0">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="px-4 md:px-6 py-2 md:py-2.5 rounded-full border border-[#c8dff0] text-[#3d7ab5] no-underline text-[0.82rem] md:text-[0.9rem] font-semibold transition-all duration-300 hover:bg-[#f0f7ff] hover:border-[#3d7ab5]">
+                Log In
+              </Link>
+              <Link href="/signup" className="bg-[#3d7ab5] text-white px-5 md:px-8 py-2 md:py-2.5 rounded-full text-[0.82rem] md:text-[0.9rem] font-bold no-underline transition-all duration-300 shadow-[0_4px_12px_rgba(61,122,181,0.2)] hover:bg-[#2c5f8a] hover:shadow-[0_8px_20px_rgba(61,122,181,0.3)] hover:-translate-y-0.5 active:translate-y-0 shrink-0">
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
