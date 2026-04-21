@@ -56,9 +56,6 @@ export const adminApi = {
   getHealth: () => api.get('/admin/monitoring/health').then(res => res.data),
 };
 
-    }).then(res => res.data),
-};
-
 export const applicationApi = {
   applyToJob: (jobId: string | number, token: string) => 
     api.post('/applications', { job_id: jobId }, {

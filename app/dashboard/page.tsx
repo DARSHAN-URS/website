@@ -71,6 +71,13 @@ export default function Dashboard() {
   const handleHire = (worker: any) => {
     router.push(`/hire/${worker.id}`);
   };
+  const handleApply = async (job: any) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      showToast("Please login to apply for jobs", "error");
+      router.push('/login');
+      return;
+    }
 
     try {
       await applicationApi.applyToJob(job.id, session.access_token!);
