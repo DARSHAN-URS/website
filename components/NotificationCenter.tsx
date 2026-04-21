@@ -5,6 +5,7 @@ import { Bell, CheckCircle2, Briefcase, MessageSquare, CreditCard, ChevronRight,
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/store";
 import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "next/navigation";
 
 export interface Notification {
   id: string;
@@ -17,6 +18,7 @@ export interface Notification {
 
 export default function NotificationCenter() {
   const { user } = useUserStore();
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -74,6 +76,42 @@ export default function NotificationCenter() {
     if (!error) {
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
+    }
+  };
+
+  const handleNotificationClick = async (n: Notification) => {
+    if (!n.is_read) {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', n.id);
+
+      if (!error) {
+        setNotifications(prev => prev.map(notif => notif.id === n.id ? { ...notif, is_read: true } : notif));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    }
+
+    setIsOpen(false);
+
+    const { role } = useUserStore.getState();
+
+    // Dynamic routing based on type
+    switch (n.type) {
+      case 'message':
+        router.push('/messages');
+        break;
+      case 'job_application':
+        router.push(role === 'employer' ? '/jobs' : '/applied');
+        break;
+      case 'booking_update':
+        router.push('/bookings');
+        break;
+      case 'payment':
+        router.push(role === 'employer' ? '/profile' : '/bookings');
+        break;
+      default:
+        router.push('/dashboard');
     }
   };
 
@@ -139,6 +177,7 @@ export default function NotificationCenter() {
                 notifications.map((n) => (
                   <div 
                     key={n.id} 
+                    onClick={() => handleNotificationClick(n)}
                     className={`p-5 flex gap-4 hover:bg-[#fcfdfe] transition-colors border-b border-gray-50 group cursor-pointer ${!n.is_read ? 'bg-[#3d7ab5]/5' : ''}`}
                   >
                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${!n.is_read ? 'bg-white border-[#3d7ab5]/20' : 'bg-[#f8fafd] border-[#eef5fb]'}`}>
