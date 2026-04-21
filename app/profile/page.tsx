@@ -55,19 +55,20 @@ export default function ProfilePage() {
       const primaryTable = role === 'employer' ? 'employers' : 'employees';
       const fallbackTable = role === 'employer' ? 'employees' : 'employers';
 
+      // Use maybeSingle() to avoid 400/406 errors if no row exists yet
       let { data, error } = await supabase
         .from(primaryTable)
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
-      if (!data) {
+      if (!data && !error) {
         // Primary table had no row — try the other table
         const { data: fallbackData, error: fallbackError } = await supabase
           .from(fallbackTable)
           .select("*")
           .eq("id", userId)
-          .single();
+          .maybeSingle();
 
         if (fallbackData) {
           data = fallbackData;
@@ -84,7 +85,8 @@ export default function ProfilePage() {
         setHourlyRate(data.hourly_rate?.toString() || "");
         setWorkDetails(data.work_details || "");
       } else {
-        console.error("Profile not found in either table for user:", userId);
+        console.log("No profile record found in database for user:", userId);
+        // We still have the user from session, so we can show 'Anonymous'
       }
 
       setLoading(false);
@@ -93,35 +95,34 @@ export default function ProfilePage() {
   }, [role, router]);
 
   const handleUpdate = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return alert("Please log in again.");
+
     const table = role === 'employer' ? 'employers' : 'employees';
     const updateData: any = {
+      id: session.user.id, // Ensure ID is present for upsert
       updated_at: new Date().toISOString(),
     };
-
-    if (phone && role === 'worker') {
-        updateData.phone = phone;
-    }
 
     if (role === 'employer') {
         updateData.company_name = fullName;
     } else {
         updateData.full_name = fullName;
+        updateData.phone = phone;
+        updateData.hourly_rate = parseInt(hourlyRate); // Match int4 in schema
+        updateData.work_details = workDetails;
     }
 
-    if (role === 'worker') {
-      updateData.hourly_rate = parseFloat(hourlyRate);
-      updateData.work_details = workDetails;
-    }
-
+    // Use upsert to create or update
     const { error } = await supabase
       .from(table)
-      .update(updateData)
-      .eq("id", user.id);
+      .upsert(updateData)
+      .eq("id", session.user.id);
 
     if (!error) {
       setProfile({ ...profile, ...updateData });
       setEditing(false);
-      alert("Profile updated!");
+      alert("Profile updated successfully!");
     } else {
       alert("Update failed: " + error.message);
     }
