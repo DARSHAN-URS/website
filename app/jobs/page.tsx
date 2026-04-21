@@ -172,11 +172,8 @@ export default function JobsPage() {
     ]);
 
     if (error) {
-      if (error.message.includes("violates foreign key constraint")) {
-        alert("Please complete your worker profile first in the Profile section to apply for jobs!");
-      } else {
-        alert("Error applying: " + error.message);
-      }
+      alert("Unable to apply. Please make sure you have completed your worker profile in the Profile section before applying for jobs.");
+      console.error("Application error:", error.message);
     } else {
       alert("Application submitted successfully!");
       setAppliedJobIds(prev => new Set([...Array.from(prev), jobId]));

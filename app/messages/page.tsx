@@ -205,11 +205,12 @@ function MessagesContent() {
       content: newMessage,
     };
 
-    const { error } = await supabase.from('chat_messages').insert([msgData]);
+    const { data: newMsg, error } = await supabase.from('chat_messages').insert([msgData]).select().single();
     if (error) {
-      alert("Error: " + error.message);
+      alert("Error sending message: " + error.message);
     } else {
       setNewMessage("");
+      // Real-time listener will handle adding the message to the UI
     }
   }
 

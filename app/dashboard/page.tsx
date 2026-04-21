@@ -80,8 +80,12 @@ export default function Dashboard() {
     });
 
     if (error) {
-      if (error.message.includes('unique')) alert("You have already applied for this job!");
-      else alert("Application failed: " + error.message);
+      if (error.message.includes('unique')) {
+        alert("You have already applied for this job!");
+      } else {
+        alert("Unable to apply. Please make sure you have completed your worker profile in the Profile section before applying for jobs.");
+        console.error("Application error:", error.message);
+      }
     } else {
       alert(`Application submitted for ${job.title}!`);
       setAppliedJobIds(prev => new Set([...Array.from(prev), job.id]));

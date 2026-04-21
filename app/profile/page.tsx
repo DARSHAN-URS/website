@@ -72,9 +72,8 @@ export default function ProfilePage() {
 
         if (fallbackData) {
           data = fallbackData;
-          // Correct the Zustand role so the rest of the page works properly
-          const correctRole = fallbackTable === 'employees' ? 'worker' : 'employer';
-          setRole(correctRole as 'employer' | 'worker');
+          // We found data in the other table, but we WON'T force a role switch anymore
+          // so that the user can stay in their chosen role.
         }
       }
 
@@ -101,7 +100,7 @@ export default function ProfilePage() {
     const table = role === 'employer' ? 'employers' : 'employees';
     const updateData: any = {
       id: session.user.id,
-      // removed updated_at as it doesn't exist in schema
+      email: session.user.email, // Include email to satisfy NOT NULL constraint
     };
 
     if (role === 'employer') {
