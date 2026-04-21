@@ -68,4 +68,21 @@ export const applicationApi = {
     }).then(res => res.data),
 };
 
+export const bookingApi = {
+  getUserBookings: (token: string) => 
+    api.get('/bookings', {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => res.data),
+  
+  getBookingDetail: (bookingId: string, token: string) => 
+    api.get(`/bookings/${bookingId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => res.data),
+
+  createBooking: (data: any, token: string) => 
+    api.post('/bookings', data, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => res.data),
+};
+
 export default api;
