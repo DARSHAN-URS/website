@@ -126,11 +126,19 @@ export default function BookingsPage() {
                 {/* Header: User & Status */}
                 <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-[22px] bg-[#f8fafd] flex items-center justify-center text-3xl shadow-inner border border-[#eef5fb] group-hover:scale-110 transition-transform duration-300">
+                      <div 
+                        onClick={() => { if (role === 'employer') router.push(`/hire/${booking.worker_id}`); }}
+                        className={`w-16 h-16 rounded-[22px] bg-[#f8fafd] flex items-center justify-center text-3xl shadow-inner border border-[#eef5fb] group-hover:scale-110 transition-transform duration-300 ${role === 'employer' ? 'cursor-pointer' : ''}`}
+                      >
                          {avatar || (role === 'employer' ? "👨🏾‍🔧" : "👤")}
                       </div>
                       <div>
-                         <h3 className="font-extrabold text-[#1a2533] text-lg mb-1 leading-none">{personName}</h3>
+                         <h3 
+                           onClick={() => { if (role === 'employer') router.push(`/hire/${booking.worker_id}`); }}
+                           className={`font-extrabold text-[#1a2533] text-lg mb-1 leading-none ${role === 'employer' ? 'cursor-pointer hover:text-[#3d7ab5]' : ''} transition-colors`}
+                         >
+                            {personName}
+                         </h3>
                          <div className="flex items-center gap-2">
                             <span className="text-[10px] font-extrabold text-[#3d7ab5] uppercase tracking-widest">{role === 'employer' ? person?.category || 'General Help' : 'Customer'}</span>
                             <span className="text-[10px] font-bold text-[#6b7f93] bg-[#f8fafd] px-2 py-0.5 rounded-full border border-gray-50 uppercase tracking-widest">REF: {booking.booking_ref}</span>
@@ -192,12 +200,18 @@ export default function BookingsPage() {
                          <Star className="w-4 h-4" /> Rate Service
                       </button>
                    ) : (
-                      <Link 
-                        href={`/bookings/${booking.id}`}
+                      <button 
+                        onClick={() => {
+                          if (role === 'employer') {
+                            router.push(`/hire/${booking.worker_id}`);
+                          } else {
+                            router.push(`/bookings/${booking.id}`);
+                          }
+                        }}
                         className="flex-[2] bg-[#3d7ab5] text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center hover:bg-[#2c5f8a] transition-all shadow-lg shadow-[#3d7ab5]/10"
                       >
-                         View Details
-                      </Link>
+                         {role === 'employer' ? 'View Profile' : 'View Details'}
+                      </button>
                    )}
                 </div>
               </div>

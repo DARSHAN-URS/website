@@ -72,14 +72,18 @@ export default function SearchPage() {
             <div className="col-span-full py-20 text-center opacity-40 italic font-medium">No nearby workers found. Try another search.</div>
           ) : (
             workers.map((worker) => (
-              <div key={worker.id} className="bg-white border border-[#dde9f3] rounded-[24px] p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden">
+              <div 
+                key={worker.id} 
+                onClick={() => handleHire(worker)}
+                className="bg-white border border-[#dde9f3] rounded-[24px] p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden cursor-pointer"
+              >
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-16 h-16 rounded-2xl bg-[#eef5fb] flex items-center justify-center text-3xl shadow-inner group-hover:bg-[#3d7ab5] group-hover:text-white transition-all duration-300">
                     {worker.avatar_url || "👨🏾‍🔧"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-lg text-[#1a2533] truncate">{worker.full_name || 'Anonymous Worker'}</h3>
+                      <h3 className="font-bold text-lg text-[#1a2533] truncate group-hover:text-[#3d7ab5] transition-colors">{worker.full_name || 'Anonymous Worker'}</h3>
                       <div className="flex items-center gap-1 text-[#f59e0b] font-bold text-sm shrink-0">
                         <Star className="w-4 h-4 fill-current" />
                         {worker.rating || "4.5"}
@@ -98,7 +102,7 @@ export default function SearchPage() {
                     <span className="text-[10px] font-extrabold text-[#6b7f93] uppercase tracking-widest block">Starts from</span>
                     <span className="font-serif font-extrabold text-[#3d7ab5] text-xl">₹{worker.hourly_rate || "499"}/day</span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <button 
                       onClick={() => router.push(`/messages?user_id=${worker.id}`)}
                       className="p-3 rounded-xl bg-[#eef5fb] text-[#3d7ab5] hover:bg-[#d9e8f5] transition-all"
@@ -107,7 +111,7 @@ export default function SearchPage() {
                     </button>
                     <button 
                       onClick={() => handleHire(worker)}
-                      className="bg-[#3d7ab5] text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-[#2c5f8a] transition-all"
+                      className="bg-[#3d7ab5] text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-[#2c5f8a] transition-all hover:scale-105 active:scale-95"
                     >
                       Hire Now
                     </button>

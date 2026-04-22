@@ -9,11 +9,12 @@ import { useRouter } from "next/navigation";
 
 export interface Notification {
   id: string;
-  type: 'job_application' | 'booking_update' | 'message' | 'payment';
+  type: 'job_application' | 'booking_update' | 'message' | 'payment' | 'application' | 'application_status' | 'booking';
   title: string;
   message: string;
   is_read: boolean;
   created_at: string;
+  link_id?: string;
 }
 
 export default function NotificationCenter() {
@@ -96,14 +97,19 @@ export default function NotificationCenter() {
 
     const { role } = useUserStore.getState();
 
-    // Dynamic routing based on type
+    // Dynamic routing based on type and link_id
     switch (n.type) {
       case 'message':
-        router.push('/messages');
+        router.push(n.link_id ? `/messages?user_id=${n.link_id}` : '/messages');
         break;
+      case 'application':
       case 'job_application':
-        router.push(role === 'employer' ? '/jobs' : '/applied');
+        router.push(role === 'employer' && n.link_id ? `/jobs/${n.link_id}/applications` : (role === 'employer' ? '/jobs' : '/applied'));
         break;
+      case 'application_status':
+        router.push('/applied');
+        break;
+      case 'booking':
       case 'booking_update':
         router.push('/bookings');
         break;

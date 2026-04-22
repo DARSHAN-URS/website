@@ -12,7 +12,9 @@ import {
   Star,
   ArrowLeft,
   Search,
-  Users
+  Users,
+  Check,
+  X
 } from "lucide-react";
 import Link from "next/link";
 
@@ -99,14 +101,25 @@ export default function JobApplicationsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {applications.map((app) => (
-            <div key={app.id} className="bg-white border border-[#dde9f3] rounded-[24px] p-6 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 border-l-4 border-l-[#3d7ab5]">
+            <div 
+              key={app.id} 
+              onClick={() => router.push(`/hire/${app.worker_id}`)}
+              className="bg-white border border-[#dde9f3] rounded-[24px] p-6 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 border-l-4 border-l-[#3d7ab5] cursor-pointer group"
+            >
               <div className="flex-1 flex gap-4 items-center">
-                <div className="w-14 h-14 rounded-2xl bg-[#f8fafd] flex items-center justify-center text-2xl border border-[#dde9f3] shrink-0">
+                <div 
+                  className="w-14 h-14 rounded-2xl bg-[#f8fafd] flex items-center justify-center text-2xl border border-[#dde9f3] shrink-0"
+                >
                   {app.worker?.avatar_url || "👨🏾‍🔧"}
                 </div>
                 <div className="min-w-0">
                    <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-[#1a2533] text-lg truncate">{app.worker?.full_name || 'Anonymous candidate'}</h3>
+                      <h3 
+                        onClick={() => router.push(`/hire/${app.worker_id}`)}
+                        className="font-extrabold text-[#1a2533] text-lg truncate cursor-pointer hover:text-[#3d7ab5] transition-all"
+                      >
+                        {app.worker?.full_name || 'Anonymous candidate'}
+                      </h3>
                       {getStatusBadge(app.status)}
                    </div>
                    <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] font-bold text-[#6b7f93]">
@@ -115,34 +128,32 @@ export default function JobApplicationsPage() {
                       <span className="text-[#3d7ab5]">₹{app.worker?.hourly_rate || 150}/hr</span>
                    </div>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:pl-6 border-[#f0f4f8]">
-                 <button 
-                   onClick={() => router.push(`/messages?user_id=${app.worker_id}`)}
-                   className="p-3 bg-[#eef5fb] text-[#3d7ab5] rounded-xl hover:bg-[#d9e8f5] transition-all"
-                   title="Chat with candidate"
-                 >
-                   <MessageSquare className="w-5 h-5" />
-                 </button>
-                 {app.status === 'pending' && (
+               {/* Action Buttons */}
+               <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                 {app.status === 'pending' ? (
                    <>
-                      <button 
-                        onClick={() => handleStatusUpdate(app.id, 'accepted')}
-                        disabled={!!updatingId}
-                        className="flex-1 md:flex-none px-6 py-3 bg-[#1a8c4e] text-white rounded-xl text-xs font-bold hover:bg-[#15733f] transition-all"
-                      >
-                        Accept
-                      </button>
-                      <button 
-                        onClick={() => handleStatusUpdate(app.id, 'rejected')}
-                        disabled={!!updatingId}
-                        className="flex-1 md:flex-none px-6 py-3 bg-white border border-red-100 text-red-500 rounded-xl text-xs font-bold hover:bg-red-50"
-                      >
-                        Reject
-                      </button>
+                     <button 
+                       onClick={() => handleStatusUpdate(app.id, 'rejected')}
+                       className="p-3.5 rounded-2xl border border-red-100 text-red-500 hover:bg-red-50 transition-all shadow-sm"
+                       title="Reject Application"
+                     >
+                       <X className="w-5 h-5" />
+                     </button>
+                     <button 
+                       onClick={() => handleStatusUpdate(app.id, 'accepted')}
+                       className="p-[14px_32px] rounded-2xl bg-[#1a8c4e] text-white font-extrabold text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-[#1a8c4e]/20 flex items-center gap-2"
+                     >
+                       Accept Application <Check className="w-4 h-4" />
+                     </button>
                    </>
+                 ) : (
+                   <div className={`px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest border ${
+                     app.status === 'accepted' ? 'bg-[#e6f7ee] text-[#1a8c4e] border-[#b7e4cd]' : 'bg-red-50 text-red-500 border-red-100'
+                   }`}>
+                     {app.status}
+                   </div>
                  )}
+               </div>
               </div>
             </div>
           ))}

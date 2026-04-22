@@ -16,10 +16,11 @@ import {
   Calendar,
   Building
 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AppliedPage() {
   const { user } = useUserStore();
+  const router = useRouter();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -110,7 +111,11 @@ export default function AppliedPage() {
           {applications.map((app) => {
             const style = getStatusStyle(app.status);
             return (
-              <div key={app.id} className="bg-white border border-[#dde9f3] rounded-[24px] md:rounded-[32px] p-5 md:p-8 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full border-l-4 border-l-[#3d7ab5]">
+              <div 
+                key={app.id} 
+                onClick={() => router.push(`/jobs/${app.job_id}`)}
+                className="bg-white border border-[#dde9f3] rounded-[24px] md:rounded-[32px] p-5 md:p-8 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full border-l-4 border-l-[#3d7ab5] cursor-pointer"
+              >
                 {/* Header: Job Info & Status */}
                 <div className="flex items-start justify-between mb-6 md:mb-8 gap-4">
                    <div className="flex items-center gap-3 md:gap-4 flex-1">
@@ -156,16 +161,21 @@ export default function AppliedPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 mt-auto">
-                   <button className="flex-1 bg-white border border-[#dde9f3] text-[#1a2533] py-2.5 md:py-3.5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm flex items-center justify-center gap-2">
-                      View
+                   <button 
+                     onClick={() => router.push(`/jobs/${app.job_id}`)}
+                     className="flex-1 bg-white border border-[#dde9f3] text-[#1a2533] py-2.5 md:py-3.5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 hover:bg-[#eef5fb] transition-all"
+                   >
+                      View Profile
                    </button>
                    {(app.status === 'hired' || app.status === 'accepted') && (
-                     <Link 
-                       href={`/messages?user_id=${app.job?.employer_id}`}
-                       className="flex-[2] bg-[#3d7ab5] text-white py-2.5 md:py-3.5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-[#2c5f8a] shadow-lg shadow-[#3d7ab5]/10 flex items-center justify-center gap-2"
-                     >
-                        Get Started <ArrowRight className="w-4 h-4" />
-                     </Link>
+                     <div className="flex-[2]" onClick={(e) => e.stopPropagation()}>
+                       <Link 
+                         href={`/messages?user_id=${app.job?.employer_id}`}
+                         className="w-full bg-[#3d7ab5] text-white py-2.5 md:py-3.5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-[#2c5f8a] shadow-lg shadow-[#3d7ab5]/10 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95"
+                       >
+                          Get Started <ArrowRight className="w-4 h-4" />
+                       </Link>
+                     </div>
                    )}
                 </div>
               </div>

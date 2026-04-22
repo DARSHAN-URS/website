@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { 
+  User,
   Calendar, 
   Clock, 
   MapPin, 
@@ -30,6 +31,8 @@ export default function HireWorkerPage() {
   const [selectedTime, setSelectedTime] = useState("");
   const [address, setAddress] = useState("B-42, Sector 18, Noida, UP 201301");
   const [isLocating, setIsLocating] = useState(false);
+  const [hours, setHours] = useState(8); // Default to full day
+  const [isFullDay, setIsFullDay] = useState(true);
 
   const timeSlots = [
     "07:00 AM", "09:00 AM", "10:00 AM", "11:30 AM",
@@ -96,7 +99,7 @@ export default function HireWorkerPage() {
         category_id: worker.category_id || 1, // Defaulting to 1 if not provided
         booking_date: selectedDate,
         time_slot: selectedTime,
-        hours: 8, // Standard daily wage duration
+        hours: hours,
         address: address
       };
 
@@ -182,6 +185,56 @@ export default function HireWorkerPage() {
                  </div>
               </div>
 
+              {/* Work Duration Section */}
+              <div className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm">
+                 <div className="flex items-center gap-2 mb-8">
+                    <div className="w-10 h-10 rounded-2xl bg-[#eef5fb] flex items-center justify-center">
+                       <Clock className="w-5 h-5 text-[#3d7ab5]" />
+                    </div>
+                    <h2 className="text-xl font-extrabold text-[#1a2533]">Work Duration</h2>
+                 </div>
+
+                 <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex-1">
+                       <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block mb-4">Choose Duration</label>
+                       <div className="flex gap-3">
+                          <button 
+                            onClick={() => { setIsFullDay(true); setHours(8); }}
+                            className={`flex-1 py-4 rounded-xl font-bold text-sm border-2 transition-all ${isFullDay ? 'border-[#3d7ab5] bg-[#eef5fb] text-[#3d7ab5]' : 'border-gray-50 bg-[#fdfdfd] text-[#6b7f93] hover:border-[#3d7ab5]/30'}`}
+                          >
+                             Full Day (8 hrs)
+                          </button>
+                          <button 
+                            onClick={() => setIsFullDay(false)}
+                            className={`flex-1 py-4 rounded-xl font-bold text-sm border-2 transition-all ${!isFullDay ? 'border-[#3d7ab5] bg-[#eef5fb] text-[#3d7ab5]' : 'border-gray-50 bg-[#fdfdfd] text-[#6b7f93] hover:border-[#3d7ab5]/30'}`}
+                          >
+                             Custom Hours
+                          </button>
+                       </div>
+                    </div>
+
+                    {!isFullDay && (
+                       <div className="flex-1 animate-[fadeUp_0.3s_ease_both]">
+                          <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block mb-4">Number of Hours</label>
+                          <div className="flex items-center gap-4">
+                             <input 
+                               type="range" 
+                               min="1" 
+                               max="12" 
+                               value={hours} 
+                               onChange={(e) => setHours(parseInt(e.target.value))}
+                               className="flex-1 accent-[#3d7ab5]"
+                             />
+                             <span className="w-12 h-12 rounded-xl bg-[#3d7ab5] text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-[#3d7ab5]/20">
+                                {hours}
+                             </span>
+                          </div>
+                          <p className="text-[10px] text-[#6b7f93] font-bold mt-2 italic">*Maximum 12 hours allowed for single booking</p>
+                       </div>
+                    )}
+                 </div>
+              </div>
+
               {/* Address Section */}
               <div className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm">
                  <div className="flex items-center gap-2 mb-8">
@@ -207,6 +260,38 @@ export default function HireWorkerPage() {
                     </button>
                  </div>
               </div>
+
+              {/* About Section */}
+              <div className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm">
+                  <div className="flex items-center gap-2 mb-6">
+                     <div className="w-10 h-10 rounded-2xl bg-[#eef5fb] flex items-center justify-center">
+                        <User className="w-5 h-5 text-[#3d7ab5]" />
+                     </div>
+                     <h2 className="text-xl font-extrabold text-[#1a2533]">About the Expert</h2>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] mb-3">Work Experience & Bio</h4>
+                      <p className="text-[#1a2533] font-medium leading-relaxed">
+                        {worker.work_details || "No detailed work description provided yet. This worker is verified and ready for service."}
+                      </p>
+                    </div>
+                    
+                    {worker.skills && (
+                      <div>
+                        <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] mb-3">Specialized Skills</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {worker.skills.split(',').map((skill: string, i: number) => (
+                            <span key={i} className="px-4 py-2 bg-[#f0f7ff] text-[#3d7ab5] text-xs font-bold rounded-xl border border-[#c8dff0]">
+                              {skill.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+               </div>
            </div>
 
            {/* Sidebar: Summary */}
@@ -229,16 +314,24 @@ export default function HireWorkerPage() {
                  </div>
                  
                  <div className="bg-[#f8fafd] rounded-2xl p-6 border border-[#eef5fb]">
+                    <div className="flex justify-between items-baseline mb-2">
+                       <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-[#6b7f93]">Base Rate</span>
+                       <span className="text-sm font-bold text-[#1a2533]">₹{worker.hourly_rate || 150}/hr</span>
+                    </div>
+                    <div className="flex justify-between items-baseline mb-4">
+                       <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-[#6b7f93]">Duration</span>
+                       <span className="text-sm font-bold text-[#1a2533]">{hours} Hours</span>
+                    </div>
                     <div className="flex justify-between items-baseline">
-                       <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-[#6b7f93]">Daily Wage</span>
-                       <span className="text-2xl font-extrabold text-[#3d7ab5] font-serif">₹{worker.hourly_rate * 8 || 1500}</span>
+                       <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-[#6b7f93]">Total Wage</span>
+                       <span className="text-2xl font-extrabold text-[#3d7ab5] font-serif">₹{worker.hourly_rate * hours || 0}</span>
                     </div>
                     <div className="h-px bg-[#dde9f3] my-4"></div>
                     <div className="flex justify-between items-baseline">
-                       <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-[#1a2533]">Final Booking Total</span>
-                       <span className="text-3xl font-extrabold text-[#1a2533] font-serif">₹{worker.hourly_rate * 8 + 50}</span>
+                       <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-[#1a2533]">Final Amount</span>
+                       <span className="text-3xl font-extrabold text-[#1a2533] font-serif">₹{worker.hourly_rate * hours + 50}</span>
                     </div>
-                    <p className="text-[9px] text-[#6b7f93] font-bold uppercase mt-2 tracking-wider">*Includes platform convenience fee</p>
+                    <p className="text-[9px] text-[#6b7f93] font-bold uppercase mt-2 tracking-wider">*Includes ₹50 platform convenience fee</p>
                  </div>
               </div>
 
