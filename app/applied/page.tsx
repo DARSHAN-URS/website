@@ -17,6 +17,7 @@ import {
   Building
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AppliedPage() {
   const { user } = useUserStore();
