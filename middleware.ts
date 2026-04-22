@@ -6,9 +6,9 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
-  // Hardcoded URL for build reliability
+  // Using env variable for build reliability
   const supabase = createServerClient(
-    'https://bixrgczukyudjoprsjyp.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
@@ -32,11 +32,18 @@ export async function middleware(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     // HYBRID CHECK: 
-    const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('auth-token') || c.name === 'sb-access-token');
+    const allCookies = request.cookies.getAll();
+    const hasAuthCookie = allCookies.some(c => 
+      c.name.includes('auth-token') || 
+      c.name === 'sb-access-token' ||
+      c.name.includes('supabase-auth')
+    );
 
     if (!user && !hasAuthCookie) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
+      // Preserve the intended destination
+      url.searchParams.set('redirectedFrom', request.nextUrl.pathname)
       return NextResponse.redirect(url)
     }
   } catch (e) {
@@ -48,11 +55,17 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard",
     "/dashboard/:path*",
+    "/profile",
     "/profile/:path*",
+    "/jobs",
     "/jobs/:path*",
+    "/messages",
     "/messages/:path*",
+    "/settings",
     "/settings/:path*",
+    "/admin",
     "/admin/:path*",
   ],
 }

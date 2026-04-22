@@ -15,25 +15,27 @@ export default function Signup() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const router = useRouter();
 
-  useState(() => {
+  useEffect(() => {
     async function checkSession() {
       // Handle auth code redirect if it lands here
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
+      const next = params.get('next') || '/dashboard';
+
       if (code) {
-        window.location.href = `/auth/callback?code=${code}&next=/dashboard`;
+        window.location.href = `/auth/callback?code=${code}&next=${next}`;
         return;
       }
 
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        window.location.href = "/dashboard";
+        window.location.href = next;
       } else {
         setSessionChecked(true);
       }
     }
     checkSession();
-  });
+  }, []);
 
   if (!sessionChecked) {
     return (
@@ -79,7 +81,11 @@ export default function Signup() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`, 
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         }
       });
       if (error) setError(error.message);

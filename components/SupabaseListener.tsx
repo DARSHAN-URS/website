@@ -10,7 +10,8 @@ export default function SupabaseListener() {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session) {
           // Set cookie 'sb-access-token' for hybrid middleware to see
-          document.cookie = `sb-access-token=${session.access_token}; path=/; SameSite=Lax; Secure; Max-Age=${60 * 60 * 24 * 7}`;
+          // Removed 'Secure' to ensure it works on localhost/http
+          document.cookie = `sb-access-token=${session.access_token}; path=/; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`;
         }
       } else if (event === 'SIGNED_OUT') {
         // Clear cookie on sign out
