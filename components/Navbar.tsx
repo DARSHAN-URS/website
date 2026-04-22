@@ -2,8 +2,7 @@
 
 import { useUserStore } from "@/lib/store";
 import { 
-  Bell, 
-  Search, 
+  MessageSquare,
   User as UserIcon, 
   MapPin,
   Menu
@@ -42,14 +41,9 @@ export default function Navbar() {
       </div>
       
       <div className="flex items-center gap-4 lg:gap-6">
-         <div className="hidden sm:flex items-center gap-0 bg-[#eef5fb] rounded-2xl border border-[#dde9f3] group focus-within:ring-2 focus-within:ring-[#3d7ab5]/10 focus-within:bg-white transition-all">
-            <div className="pl-4 pr-2 text-[#6b7f93]"><Search className="w-4 h-4" /></div>
-            <input 
-              type="text" 
-              placeholder="Search anything..." 
-              className="bg-transparent border-none outline-none py-3 pr-4 text-sm font-medium w-48 lg:w-64"
-            />
-         </div>
+         <Link href="/messages" className="w-11 h-11 bg-white border border-[#dde9f3] rounded-2xl flex items-center justify-center text-[#1a2533] hover:bg-[#eef5fb] transition-all cursor-pointer">
+            <MessageSquare className="w-5 h-5" />
+         </Link>
          
          <div className="flex items-center gap-3">
             <NotificationCenter />
