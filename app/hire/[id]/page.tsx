@@ -24,6 +24,7 @@ export default function HireWorkerPage() {
   const router = useRouter();
   const [worker, setWorker] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Form State
