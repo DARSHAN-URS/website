@@ -127,15 +127,21 @@ export default function BookingsPage() {
                 <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-4">
                       <div 
-                        onClick={() => { if (role === 'employer') router.push(`/hire/${booking.worker_id}`); }}
+                        onClick={() => { 
+                          const wId = booking.worker?.id || booking.worker_id;
+                          if (role === 'employer' && wId) router.push(`/hire/${wId}`); 
+                        }}
                         className={`w-16 h-16 rounded-[22px] bg-[#f8fafd] flex items-center justify-center text-3xl shadow-inner border border-[#eef5fb] group-hover:scale-110 transition-transform duration-300 ${role === 'employer' ? 'cursor-pointer' : ''}`}
                       >
                          {avatar || (role === 'employer' ? "👨🏾‍🔧" : "👤")}
                       </div>
                       <div>
                          <h3 
-                           onClick={() => { if (role === 'employer') router.push(`/hire/${booking.worker_id}`); }}
-                           className={`font-extrabold text-[#1a2533] text-lg mb-1 leading-none ${role === 'employer' ? 'cursor-pointer hover:text-[#3d7ab5]' : ''} transition-colors`}
+                          onClick={() => { 
+                             const wId = booking.worker?.id || booking.worker_id;
+                             if (role === 'employer' && wId) router.push(`/hire/${wId}`); 
+                          }}
+                          className={`font-extrabold text-[#1a2533] text-lg mb-1 leading-none ${role === 'employer' ? 'cursor-pointer hover:text-[#3d7ab5]' : ''} transition-colors`}
                          >
                             {personName}
                          </h3>
@@ -190,7 +196,12 @@ export default function BookingsPage() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 mt-auto">
                    <button 
-                     onClick={() => router.push(`/messages?user_id=${role === 'employer' ? booking.worker_id : booking.customer_id}`)}
+                     onClick={() => {
+                       const targetId = role === 'employer' 
+                         ? (booking.worker?.id || booking.worker_id) 
+                         : (booking.customer_id);
+                       if (targetId) router.push(`/messages?user_id=${targetId}`);
+                     }}
                      className="flex-1 bg-white border border-[#dde9f3] text-[#1a2533] py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#eef5fb] transition-all"
                    >
                       <MessageSquare className="w-4 h-4 text-[#3d7ab5]" /> Chat
@@ -202,9 +213,10 @@ export default function BookingsPage() {
                    ) : (
                       <button 
                         onClick={() => {
-                          if (role === 'employer') {
-                            router.push(`/hire/${booking.worker_id}`);
-                          } else {
+                          const wId = booking.worker?.id || booking.worker_id;
+                          if (role === 'employer' && wId) {
+                            router.push(`/hire/${wId}`);
+                          } else if (booking.id) {
                             router.push(`/bookings/${booking.id}`);
                           }
                         }}
