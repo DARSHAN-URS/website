@@ -12,9 +12,19 @@ export default function Home() {
 
   useEffect(() => {
     async function checkUser() {
+      // Handle auth code redirect if it lands on root
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (code) {
+        window.location.href = `/auth/callback?code=${code}&next=/dashboard`;
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
+        window.location.href = "/dashboard";
+        return;
       }
       setSessionChecked(true);
     }

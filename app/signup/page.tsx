@@ -12,7 +12,36 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
   const router = useRouter();
+
+  useState(() => {
+    async function checkSession() {
+      // Handle auth code redirect if it lands here
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (code) {
+        window.location.href = `/auth/callback?code=${code}&next=/dashboard`;
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        window.location.href = "/dashboard";
+      } else {
+        setSessionChecked(true);
+      }
+    }
+    checkSession();
+  });
+
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#eef5fb]">
+        <div className="w-12 h-12 border-4 border-[#3d7ab5]/30 border-t-[#3d7ab5] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   async function handleSignup(event: React.FormEvent) {
     event.preventDefault();
@@ -50,7 +79,7 @@ export default function Signup() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`, 
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`, 
         }
       });
       if (error) setError(error.message);

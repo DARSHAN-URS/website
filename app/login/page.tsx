@@ -10,6 +10,35 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  useState(() => {
+    async function checkSession() {
+      // Handle auth code redirect if it lands here
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (code) {
+        window.location.href = `/auth/callback?code=${code}&next=/dashboard`;
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        window.location.href = "/dashboard";
+      } else {
+        setSessionChecked(true);
+      }
+    }
+    checkSession();
+  });
+
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#eef5fb]">
+        <div className="w-12 h-12 border-4 border-[#3d7ab5]/30 border-t-[#3d7ab5] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
