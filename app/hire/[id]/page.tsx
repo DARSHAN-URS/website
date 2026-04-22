@@ -218,30 +218,6 @@ export default function HireWorkerPage() {
                  </div>
               </div>
 
-               {/* Work Duration Section */}
-               <div className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm">
-                  <div className="flex items-center gap-2 mb-8">
-                     <div className="w-10 h-10 rounded-2xl bg-[#eef5fb] flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-[#3d7ab5]" />
-                     </div>
-                     <h2 className="text-xl font-extrabold text-[#1a2533]">Work Duration</h2>
-                  </div>
- 
-                  <div className="bg-[#f8fafd] rounded-2xl p-8 border border-[#eef5fb]">
-                     <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-[#3d7ab5] flex items-center justify-center text-white">
-                           <CheckCircle2 className="w-6 h-6" />
-                        </div>
-                        <div>
-                           <h4 className="font-bold text-[#1a2533]">Full Day Commitment</h4>
-                           <p className="text-[10px] font-extrabold text-[#3d7ab5] uppercase tracking-widest">Standard 8-Hour Shift</p>
-                        </div>
-                     </div>
-                     <p className="text-xs text-[#6b7f93] leading-relaxed">
-                        LaborGrow operates on a daily hiring basis. All experts are booked for a standard 8-hour shift to ensure job quality and completion.
-                     </p>
-                  </div>
-               </div>
 
               {/* Address Section */}
               <div className="bg-white border border-[#dde9f3] rounded-[32px] p-8 shadow-sm">
