@@ -103,8 +103,8 @@ export default function SearchPage() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-50">
                   <div>
-                    <span className="text-[10px] font-extrabold text-[#6b7f93] uppercase tracking-widest block">Starts from</span>
-                    <span className="font-serif font-extrabold text-[#3d7ab5] text-xl">₹{worker.hourly_rate || "499"}/day</span>
+                    <span className="text-[10px] font-extrabold text-[#6b7f93] uppercase tracking-widest block">Daily Rate</span>
+                    <span className="font-serif font-extrabold text-[#3d7ab5] text-xl">₹{worker.daily_rate || worker.hourly_rate || "499"}/day</span>
                   </div>
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <button 

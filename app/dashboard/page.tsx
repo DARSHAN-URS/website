@@ -210,7 +210,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-serif font-extrabold text-[#3d7ab5]">₹{worker.hourly_rate || 499}</div>
+                    <div className="font-serif font-extrabold text-[#3d7ab5]">₹{worker.daily_rate || worker.hourly_rate || 499}/day</div>
                     <div className="text-[9px] font-bold text-[#1a8c4e]">Available</div>
                   </div>
                 </div>

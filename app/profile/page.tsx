@@ -38,7 +38,7 @@ export default function ProfilePage() {
   // Edit state
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [hourlyRate, setHourlyRate] = useState("");
+  const [dailyRate, setDailyRate] = useState("");
   const [workDetails, setWorkDetails] = useState("");
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function ProfilePage() {
         setProfile(data);
         setFullName(data.full_name || data.company_name || "");
         setPhone(data.phone || "");
-        setHourlyRate(data.hourly_rate?.toString() || "");
+        setDailyRate(data.daily_rate?.toString() || data.hourly_rate?.toString() || "");
         setWorkDetails(data.work_details || "");
       } else {
         console.log("No profile record found in database for user:", userId);
@@ -113,7 +113,7 @@ export default function ProfilePage() {
     } else {
         updateData.full_name = fullName;
         updateData.phone = phone;
-        updateData.hourly_rate = parseInt(hourlyRate) || 0; 
+        updateData.daily_rate = parseInt(dailyRate) || 0; 
         updateData.work_details = workDetails;
     }
 
@@ -227,11 +227,11 @@ export default function ProfilePage() {
                       )}
                       {role === 'worker' && (
                         <div className="space-y-1.5">
-                           <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block">Daily Rate (8 hrs)</label>
+                           <label className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] block">Daily Rate (Full Day)</label>
                            {editing ? (
-                             <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} className="w-full bg-[#f8fafd] border-b-2 border-[#dde9f3] py-2 outline-none focus:border-[#3d7ab5] text-sm font-bold"/>
+                             <input type="number" value={dailyRate} onChange={e => setDailyRate(e.target.value)} className="w-full bg-[#f8fafd] border-b-2 border-[#dde9f3] py-2 outline-none focus:border-[#3d7ab5] text-sm font-bold"/>
                            ) : (
-                             <div className="flex items-center gap-2.5 text-lg font-black text-[#1a8c4e] uppercase font-serif">₹{profile?.hourly_rate || '0'}</div>
+                             <div className="flex items-center gap-2.5 text-lg font-black text-[#1a8c4e] uppercase font-serif">₹{profile?.daily_rate || profile?.hourly_rate || '0'}</div>
                            )}
                         </div>
                       )}

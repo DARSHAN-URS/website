@@ -125,7 +125,7 @@ export default function JobApplicationsPage() {
                    <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] font-bold text-[#6b7f93]">
                       <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#3d7ab5]" /> {app.worker?.city || 'Noida'}</span>
                       <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-orange-400 fill-current" /> {app.worker?.rating || '4.8'}</span>
-                      <span className="text-[#3d7ab5]">₹{app.worker?.hourly_rate || 150}/hr</span>
+                      <span className="text-[#3d7ab5]">₹{app.worker?.daily_rate || app.worker?.hourly_rate || 500}/day</span>
                    </div>
                 </div>
                {/* Action Buttons */}
