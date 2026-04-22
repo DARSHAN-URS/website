@@ -41,20 +41,48 @@ export default function HireWorkerPage() {
 
   useEffect(() => {
     async function fetchWorker() {
-      if (!params || !params.id) return;
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("employees")
-        .select("*")
-        .eq("id", params.id)
-        .single();
+      // Robust param check
+      const workerId = params?.id;
+      if (!workerId) {
+        console.warn("No worker ID provided in URL params");
+        return;
+      }
 
-      if (data) setWorker(data);
-      if (error) console.error("Worker fetch error:", error.message);
-      setLoading(false);
+      setLoading(true);
+      setError(null);
+
+      try {
+        console.log(`Fetching worker with ID: ${workerId}`);
+        const { data, error: fetchError } = await supabase
+          .from("employees")
+          .select("*")
+          .eq("id", workerId)
+          .maybeSingle();
+
+        if (fetchError) {
+          console.error("Supabase fetch error:", fetchError.message);
+          setError(`Database error: ${fetchError.message}`);
+        } else if (!data) {
+          console.warn(`No worker found in 'employees' table for ID: ${workerId}`);
+          
+          // Optional: Check if user exists in 'users' but not 'employees'
+          const { data: userData } = await supabase.auth.getUser();
+          console.log("Current session user:", userData?.user?.id);
+          
+          setError("Worker not found in the marketplace database.");
+        } else {
+          console.log("Successfully fetched worker data:", data.full_name);
+          setWorker(data);
+        }
+      } catch (err: any) {
+        console.error("Unexpected fetch error:", err);
+        setError("An unexpected error occurred while fetching worker details.");
+      } finally {
+        setLoading(false);
+      }
     }
 
-    if (params?.id) fetchWorker();
+    fetchWorker();
   }, [params?.id]);
 
   const handleUseMyLocation = () => {
@@ -119,9 +147,15 @@ export default function HireWorkerPage() {
   );
 
   if (!worker) return (
-    <div className="p-12 text-center">
-      <h2 className="text-2xl font-bold">Worker not found</h2>
-      <Link href="/search" className="text-[#3d7ab5] mt-4 block underline">Back to Search</Link>
+    <div className="p-12 text-center h-screen flex flex-col items-center justify-center">
+       <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-6">
+          <AlertCircle className="w-10 h-10" />
+       </div>
+       <h2 className="text-3xl font-extrabold text-[#1a2533] font-serif mb-2">{error || "Worker not found"}</h2>
+       <p className="text-[#6b7f93] font-medium max-w-sm mb-8">We couldn't locate the profile you're looking for. It may have been moved or the ID might be invalid.</p>
+       <Link href="/search" className="bg-[#3d7ab5] text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg shadow-[#3d7ab5]/20 hover:scale-105 transition-all">
+          Back to Marketplace
+       </Link>
     </div>
   );
 

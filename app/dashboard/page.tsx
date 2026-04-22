@@ -69,7 +69,11 @@ export default function Dashboard() {
   }, [role, router, setUser]);
 
   const handleHire = (worker: any) => {
-    router.push(`/hire/${worker.id}`);
+    if (worker?.id) {
+      router.push(`/hire/${worker.id}`);
+    } else {
+      console.error("Worker ID missing in search results", worker);
+    }
   };
   const handleApply = async (job: any) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -186,7 +190,13 @@ export default function Dashboard() {
             workers.map((worker) => (
               <div 
                 key={worker.id} 
-                onClick={() => router.push(`/hire/${worker.id}`)}
+                onClick={() => {
+                  if (worker.id) {
+                    router.push(`/hire/${worker.id}`);
+                  } else {
+                    console.error("Worker ID is missing:", worker);
+                  }
+                }}
                 className="bg-white border border-[#dde9f3] rounded-[24px] p-6 shadow-sm hover:shadow-md transition-all border-b-4 border-b-[#3d7ab5] cursor-pointer group"
               >
                 <div className="flex items-center gap-4 mb-5">

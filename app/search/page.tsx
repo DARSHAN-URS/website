@@ -35,7 +35,11 @@ export default function SearchPage() {
   };
 
   const handleHire = (worker: any) => {
-    router.push(`/hire/${worker.id}`);
+    if (worker?.id) {
+      router.push(`/hire/${worker.id}`);
+    } else {
+      console.error("Worker ID missing in search results", worker);
+    }
   };
 
   return (
