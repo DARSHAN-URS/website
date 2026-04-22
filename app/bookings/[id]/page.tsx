@@ -16,6 +16,7 @@ import {
   Phone,
 } from "lucide-react";
 import Link from "next/link";
+import { bookingApi } from "@/lib/api";
 
 export default function BookingDetailsPage() {
   const params = useParams();
@@ -26,20 +27,29 @@ export default function BookingDetailsPage() {
 
   useEffect(() => {
     async function fetchBookingDetails() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*, worker:employees(*)")
-        .eq("id", params.id)
-        .single();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
 
-      if (data) setBooking(data);
-      if (error) console.error("Details fetch error:", error.message);
-      setLoading(false);
+      setLoading(true);
+      try {
+        const data = await bookingApi.getBookingDetail(params.id as string, session.access_token);
+        if (data) {
+          setBooking(data);
+        } else {
+          console.warn("No booking data returned from API");
+        }
+      } catch (err: any) {
+        console.error("Details fetch error:", err.message);
+      } finally {
+        setLoading(false);
+      }
     }
 
     if (params.id) fetchBookingDetails();
-  }, [params.id]);
+  }, [params.id, router]);
 
   if (loading) return (
     <div className="flex items-center justify-center h-screen bg-[#fdfdfd]">
@@ -64,15 +74,16 @@ export default function BookingDetailsPage() {
   const avatar = role === 'employer' ? person?.user?.profile_pic_url : person?.avatar_url;
 
   const updateStatus = async (newStatus: string) => {
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: newStatus })
-      .eq('id', booking.id);
-    
-    if (!error) {
-      setBooking({ ...booking, status: newStatus });
-    } else {
-      alert("Error updating status: " + error.message);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    try {
+      const updated = await bookingApi.updateBookingStatus(booking.id, newStatus, session.access_token);
+      if (updated) {
+        setBooking(updated);
+      }
+    } catch (err: any) {
+      alert("Error updating status: " + err.message);
     }
   };
 

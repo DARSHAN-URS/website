@@ -83,6 +83,11 @@ export const bookingApi = {
     api.post('/bookings', data, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => res.data),
+
+  updateBookingStatus: (bookingId: string, status: string, token: string) => 
+    api.patch(`/bookings/${bookingId}/status`, { status }, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => res.data),
 };
 
 export default api;
