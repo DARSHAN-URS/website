@@ -317,7 +317,7 @@ export default function HireWorkerPage() {
                       <div>
                         <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] mb-3">Specialized Skills</h4>
                         <div className="flex flex-wrap gap-2">
-                          {worker.skills.split(',').map((skill: string, i: number) => (
+                          {(Array.isArray(worker.skills) ? worker.skills : worker.skills.split(',')).map((skill: string, i: number) => (
                             <span key={i} className="px-4 py-2 bg-[#f0f7ff] text-[#3d7ab5] text-xs font-bold rounded-xl border border-[#c8dff0]">
                               {skill.trim()}
                             </span>
