@@ -216,12 +216,12 @@ export default function BookingDetailsPage() {
                          <CheckCircle2 className="w-4 h-4" /> Mark as Completed
                       </button>
                     )}
-                    {(isPending || isAccepted) && (
+                    {role === 'worker' && isAccepted && (
                       <button 
-                        onClick={() => updateStatus('cancelled')}
-                        className="w-full bg-white border border-red-100 text-red-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
+                        onClick={() => updateStatus('completed')}
+                        className="w-full bg-[#1a8c4e] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#157340] transition-all shadow-lg shadow-[#1a8c4e]/20"
                       >
-                        <AlertCircle className="w-4 h-4" /> Cancel Booking
+                         <CheckCircle2 className="w-4 h-4" /> Mark as Completed
                       </button>
                     )}
                  </div>
