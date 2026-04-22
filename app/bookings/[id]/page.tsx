@@ -182,9 +182,9 @@ export default function BookingDetailsPage() {
                     </div>
                  </div>
 
-                 <div className="space-y-3">
+                  <div className="space-y-3">
                     <button 
-                      onClick={() => router.push(`/messages?user_id=${role === 'employer' ? booking.worker_id : booking.customer_id}`)}
+                      onClick={() => router.push(`/messages?user_id=${role === 'employer' ? (booking.worker?.id || booking.worker_id) : booking.customer_id}`)}
                       className="w-full bg-[#3d7ab5] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#2c5f8a] transition-all shadow-lg shadow-[#3d7ab5]/20"
                     >
                        <MessageSquare className="w-4 h-4" /> Message {role === 'employer' ? 'Worker' : 'Customer'}
@@ -214,6 +214,30 @@ export default function BookingDetailsPage() {
                       </button>
                     )}
                  </div>
+
+                 {/* Additional Worker Info for Employer */}
+                 {role === 'employer' && booking.worker && (
+                   <div className="mt-8 pt-8 border-t border-gray-50 text-left space-y-6">
+                      <div>
+                         <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] mb-2">About Expert</h4>
+                         <p className="text-xs text-[#1a2533] font-medium leading-relaxed line-clamp-4">
+                            {booking.worker.work_details || booking.worker.bio || "Verified professional ready to serve."}
+                         </p>
+                      </div>
+                      {booking.worker.skills && (
+                        <div>
+                           <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[#6b7f93] mb-3">Skills</h4>
+                           <div className="flex flex-wrap gap-1.5">
+                              {(Array.isArray(booking.worker.skills) ? booking.worker.skills : booking.worker.skills.split(',')).map((skill: any, i: number) => (
+                                <span key={i} className="px-3 py-1 bg-[#f0f7ff] text-[#3d7ab5] text-[9px] font-bold rounded-lg border border-[#c8dff0]">
+                                  {typeof skill === 'string' ? skill : skill.skill_name}
+                                </span>
+                              ))}
+                           </div>
+                        </div>
+                      )}
+                   </div>
+                 )}
               </div>
 
               {/* Safety Card */}
