@@ -8,8 +8,8 @@ export async function middleware(request: NextRequest) {
 
   // Using env variable for build reliability
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bixrgczukyudjoprsjyp.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_oqeIi7MymSXHWuiCNgs6mA_pyNbnvSy',
     {
       cookies: {
         getAll() {
