@@ -14,9 +14,10 @@ import {
   ArrowLeft,
   ShieldCheck,
   Phone,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
-import { bookingApi } from "@/lib/api";
+import { bookingApi, reviewApi } from "@/lib/api";
 
 export default function BookingDetailsPage() {
   const params = useParams();
@@ -24,6 +25,11 @@ export default function BookingDetailsPage() {
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { role } = useUserStore();
+
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   useEffect(() => {
     async function fetchBookingDetails() {
@@ -84,6 +90,26 @@ export default function BookingDetailsPage() {
       }
     } catch (err: any) {
       alert("Error updating status: " + err.message);
+    }
+  };
+
+  const submitReview = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    setIsSubmittingReview(true);
+    try {
+      await reviewApi.createReview({
+        worker_id: booking.worker.id,
+        rating,
+        comment
+      }, session.access_token);
+      alert("Thank you for your review!");
+      setShowReviewModal(false);
+    } catch (err: any) {
+      alert("Error submitting review: " + err.message);
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -224,6 +250,14 @@ export default function BookingDetailsPage() {
                          <CheckCircle2 className="w-4 h-4" /> Mark as Completed
                       </button>
                     )}
+                    {role === 'employer' && isCompleted && (
+                      <button 
+                        onClick={() => setShowReviewModal(true)}
+                        className="w-full bg-[#f59e0b] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#d97706] transition-all shadow-lg shadow-[#f59e0b]/20"
+                      >
+                         <Star className="w-4 h-4 fill-current" /> Leave a Review
+                      </button>
+                    )}
                  </div>
 
                  {/* Additional Worker Info for Employer */}
@@ -259,9 +293,60 @@ export default function BookingDetailsPage() {
                  </div>
                  <p className="text-xs text-[#6b7f93] font-medium leading-relaxed">Your professional is background-verified. Always pay through the app for dispute protection and service guarantees.</p>
               </div>
-           </div>
+            </div>
+         </div>
+       </div>
+
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-[#1a2533]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-extrabold text-[#1a2533] mb-2 font-serif tracking-tight">Rate {personName}</h3>
+            <p className="text-[#6b7f93] text-sm mb-6 font-medium">How was your experience with this professional?</p>
+            
+            <div className="flex justify-center gap-3 mb-8 bg-[#f8fafd] py-6 rounded-2xl border border-[#dde9f3]">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button 
+                  key={star}
+                  onClick={() => setRating(star)}
+                  className="focus:outline-none transform transition-transform hover:scale-110 active:scale-95"
+                >
+                  <Star 
+                    className={`w-10 h-10 transition-colors ${rating >= star ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-[#c8dff0]'}`} 
+                  />
+                </button>
+              ))}
+            </div>
+
+            <textarea 
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Write a comment (optional)..."
+              className="w-full bg-white border-2 border-[#dde9f3] rounded-2xl p-5 text-sm focus:outline-none focus:border-[#3d7ab5] focus:ring-4 focus:ring-[#3d7ab5]/10 mb-8 min-h-[120px] resize-y transition-all placeholder:text-[#94a3b8] font-medium"
+            ></textarea>
+
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setShowReviewModal(false)}
+                className="flex-1 bg-white border-2 border-[#dde9f3] text-[#6b7f93] font-bold py-4 rounded-2xl hover:bg-[#f8fafd] hover:text-[#1a2533] hover:border-[#c8dff0] transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={submitReview}
+                disabled={isSubmittingReview}
+                className="flex-1 bg-[#3d7ab5] text-white font-bold py-4 rounded-2xl hover:bg-[#2c5f8a] transition-all shadow-lg shadow-[#3d7ab5]/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmittingReview ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Submitting...
+                  </>
+                ) : 'Submit Review'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      )}
+     </div>
+   );
+ }

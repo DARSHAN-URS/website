@@ -90,4 +90,11 @@ export const bookingApi = {
     }).then(res => res.data),
 };
 
+export const reviewApi = {
+  createReview: (data: { worker_id: string; rating: number; comment?: string }, token: string) => 
+    api.post('/reviews', data, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => res.data),
+};
+
 export default api;
