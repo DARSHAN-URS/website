@@ -120,8 +120,7 @@ export default function ProfilePage() {
     // Use upsert to create or update
     const { error } = await supabase
       .from(table)
-      .upsert(updateData)
-      .eq("id", session.user.id);
+      .upsert(updateData);
 
     if (!error) {
       setProfile({ ...profile, ...updateData });
