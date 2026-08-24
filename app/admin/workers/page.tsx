@@ -84,7 +84,7 @@ export default function WorkersPage() {
 
       <DataTable 
         columns={columns} 
-        data={workers || mockWorkers} 
+        data={workers?.data || mockWorkers} 
         isLoading={isLoading} 
       />
     </div>

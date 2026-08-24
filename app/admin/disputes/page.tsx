@@ -64,7 +64,7 @@ export default function DisputesPage() {
 
       <DataTable 
         columns={columns} 
-        data={disputes || mockDisputes} 
+        data={disputes?.data || mockDisputes} 
         isLoading={isLoading} 
       />
     </div>

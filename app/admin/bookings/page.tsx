@@ -58,7 +58,7 @@ export default function BookingsPage() {
 
       <DataTable 
         columns={columns} 
-        data={bookings || mockBookings} 
+        data={bookings?.data || mockBookings} 
         isLoading={isLoading} 
       />
     </div>

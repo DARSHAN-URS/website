@@ -75,7 +75,7 @@ export default function UsersPage() {
 
       <DataTable 
         columns={columns} 
-        data={users || mockUsers} 
+        data={users?.data || mockUsers} 
         isLoading={isLoading} 
       />
 
